@@ -44,8 +44,6 @@ public class TemplatController {
         //异常单体出现次数与时间关系结果封装
         Map<Integer, Map<Integer, Map<Integer, Integer>>> integerMapWithDate = volatilityConsistencyService.NumberOfAbnormalMonomersWithDate(strings);
         volatilityConsistencyResult.numbsWithDate(map,integerMapWithDate);
-
-
         return map;
     }
 

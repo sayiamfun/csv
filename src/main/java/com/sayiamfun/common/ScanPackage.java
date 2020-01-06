@@ -7,6 +7,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -174,6 +175,26 @@ public class ScanPackage {
                 }
                 String item[] = line.split(",");//CSV格式文件为逗号分隔符文件，这里根据逗号切分
                 resultList.add(item);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return resultList;
+    }
+
+    public static List<List<String>> getItems1(String filePath) {
+        List<List<String>> resultList = new LinkedList<>();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)));//到读取的文件
+            String line = null;
+            boolean b = true;
+            while ((line = reader.readLine()) != null) {
+                if (b) {
+                    b = false;
+                    continue;
+                }
+                String item[] = line.split(",");//CSV格式文件为逗号分隔符文件，这里根据逗号切分
+                resultList.add(Arrays.asList(item));
             }
         } catch (IOException e) {
             e.printStackTrace();

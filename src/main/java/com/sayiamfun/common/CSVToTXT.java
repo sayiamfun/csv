@@ -8,8 +8,8 @@ import java.io.*;
  */
 public class CSVToTXT {
 
-    private static final String inputPath = "D:\\车辆数据\\L6T78Y4W4GN084987\\fourSeven\\part-00007-57f77710-6f92-4808-82a0-5cd0d4bd0f4d.csv";
-    private static final String outputPath = "D:\\车辆数据\\L6T78Y4W4GN084987\\input\\part-00007-57f77710-6f92-4808-82a0-5cd0d4bd0f4d.txt";
+    private static final String inputPath = "D:\\车辆数据\\新建文件夹\\vin=LVVDC17B8JD186778\\part-00000-ad4d265c-3e5f-4c25-b622-258cba8571ba.csv";
+    private static final String outputPath = "D:\\车辆数据\\新建文件夹\\vin=LVVDC17B8JD186778\\part-00000-ad4d265c-3e5f-4c25-b622-258cba8571ba.txt";
     private static final String encode = "GBK";
 
     public static void main(String[] args) {

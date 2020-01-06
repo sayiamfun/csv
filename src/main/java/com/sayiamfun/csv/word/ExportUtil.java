@@ -1,8 +1,8 @@
 package com.sayiamfun.csv.word;
 
-import org.docx4j.org.apache.poi.poifs.filesystem.DirectoryEntry;
-import org.docx4j.org.apache.poi.poifs.filesystem.DocumentEntry;
-import org.docx4j.org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.poifs.filesystem.DirectoryEntry;
+import org.apache.poi.poifs.filesystem.DocumentEntry;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
