@@ -12,21 +12,25 @@ public class Test {
         int num1 = 0;
         int num2 = 0;
         int num3 = 0;
-        ArrayList<String> strings = ScanPackage.scanFilesWithRecursion("C:\\Users\\liwenjie\\Downloads\\20191227183418");
+        ArrayList<String> strings = ScanPackage.scanFilesWithRecursion("C:\\Users\\liwenjie\\Downloads\\20200106184018");
         for (String string : strings) {
-            if (string.contains("基于熵值的过压故障诊断模型") && string.contains("日期")) {
-                List<String[]> items = ScanPackage.getItems(string);
-                num1 += items.size();
+            if (string.contains("基于熵值的过压故障诊断模型") && string.contains("日期") && !string.contains("out")) {
+                List<List<String>> items = ScanPackage.getItems1(string);
+                for (List<String> item : items) {
+                    if (new BigDecimal(item.get(9)).compareTo(new BigDecimal("4")) > 0) {
+                        num1 += 1;
+                    }
+                }
             }
         }
         for (String string : strings) {
-            if (string.contains("波动性检测模型") && string.contains("日期")) {
+            if (string.contains("波动性检测模型") && string.contains("日期")  && !string.contains("out")) {
                 List<String[]> items = ScanPackage.getItems(string);
                 num2 += items.size();
             }
         }
         for (String string : strings) {
-            if (string.contains("压降一致性模型") && string.contains("日期")) {
+            if (string.contains("压降一致性模型") && string.contains("日期")  && !string.contains("out")) {
                 List<List<String>> lists = ScanPackage.getItems1(string);
 
                 //开始统计今天所有数据   将最小压差绝对值小于 0.02 的删除
@@ -66,9 +70,9 @@ public class Test {
                 num3 += size;
             }
         }
-        System.out.println(num1);
-        System.out.println(num2);
-        System.out.println(num3);
+        System.out.println("熵值:"+num1);
+        System.out.println("波动性:"+num2);
+        System.out.println("压降:"+num3);
     }
 
 }
