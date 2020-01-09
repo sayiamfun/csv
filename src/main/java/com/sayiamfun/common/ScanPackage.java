@@ -224,14 +224,10 @@ public class ScanPackage {
                         scanFilesWithRecursion(filelist[i].getAbsolutePath());
                     }
                     /**非文件夹**/
-                    else {
+                    else if(filelist[i].getAbsolutePath().contains(".csv") && filelist[i].getAbsolutePath().contains("熵值故障诊断模型") && filelist[i].getAbsolutePath().contains("波动一致性故障诊断模型") && filelist[i].getAbsolutePath().contains("压降一致性故障诊断模型")){
                         if (!scanFiles.contains(filelist[i].getAbsolutePath())) {
                             scanFiles.add(filelist[i].getAbsolutePath());
                         }
-                        //                    System.out.println(filelist[i].getAbsolutePath());
-                        //					if (filelist[i].getName().contains("-汉译世界学术名著丛")) {
-                        //						filelist[i].renameTo(new File("D:/Message/Book/一生必读的60本/"+filelist[i].getName().replace("-汉译世界学术名著丛", "")));
-                        //					 }
                     }
                 }
             }

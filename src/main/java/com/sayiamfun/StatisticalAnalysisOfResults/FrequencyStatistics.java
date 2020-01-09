@@ -4,6 +4,7 @@ import com.deepoove.poi.XWPFTemplate;
 import com.deepoove.poi.data.PictureRenderData;
 import com.sayiamfun.common.Constant;
 import com.sayiamfun.word.CharReport_ZXT;
+import lombok.Data;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -14,11 +15,12 @@ import java.util.*;
 /**
  * 频次统计文件
  */
+@Data
 public class FrequencyStatistics {
 
-    private int volatilityNums = 1500;//每多少帧数统计一次  波动
-    private int pressureNums = 1500;//每多少帧数统计一次  压降
-    private int entropyNums = 1500;//每多少帧数统计一次  熵值
+    private int volatilityNums = 500;//每多少帧数统计一次  波动
+    private int pressureNums = 500;//每多少帧数统计一次  压降
+    private int entropyNums = 500;//每多少帧数统计一次  熵值
     private int BatteryNum = 0;
     private String VIN;
     private String nowTime;
@@ -46,225 +48,7 @@ public class FrequencyStatistics {
     private Map<Long, Map<Integer, Integer>> EntropyMapNums = new TreeMap<>();//熵值每1500条
     private Map<Integer, Integer> EntropyMapBatterSum = new TreeMap<>();//熵值每个单体出现总次数
 
-    public int getVolatilityNums() {
-        return volatilityNums;
-    }
-
-    public void setVolatilityNums(int volatilityNums) {
-        this.volatilityNums = volatilityNums;
-    }
-
-    public int getPressureNums() {
-        return pressureNums;
-    }
-
-    public void setPressureNums(int pressureNums) {
-        this.pressureNums = pressureNums;
-    }
-
-    public int getEntropyNums() {
-        return entropyNums;
-    }
-
-    public void setEntropyNums(int entropyNums) {
-        this.entropyNums = entropyNums;
-    }
-
-    public Map<Long, Map<Integer, Integer>> getPressureDropConsistencyMapNums() {
-        return pressureDropConsistencyMapNums;
-    }
-
-    public void setPressureDropConsistencyMapNums(Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapNums) {
-        this.pressureDropConsistencyMapNums = pressureDropConsistencyMapNums;
-    }
-
-    public Map<Long, Map<Integer, Integer>> getVolatilityDetectionMapNums() {
-        return volatilityDetectionMapNums;
-    }
-
-    public void setVolatilityDetectionMapNums(Map<Long, Map<Integer, Integer>> volatilityDetectionMapNums) {
-        this.volatilityDetectionMapNums = volatilityDetectionMapNums;
-    }
-
-    public Map<Long, Map<Integer, Integer>> getEntropyMapNums() {
-        return EntropyMapNums;
-    }
-
-    public void setEntropyMapNums(Map<Long, Map<Integer, Integer>> entropyMapNums) {
-        EntropyMapNums = entropyMapNums;
-    }
-
-    public Long getPstartTime() {
-        return PstartTime;
-    }
-
-    public void setPstartTime(Long pstartTime) {
-        PstartTime = pstartTime;
-    }
-
-    public Long getVstartTime() {
-        return VstartTime;
-    }
-
-    public void setVstartTime(Long vstartTime) {
-        VstartTime = vstartTime;
-    }
-
-    public Long getEstartTime() {
-        return EstartTime;
-    }
-
-    public void setEstartTime(Long estartTime) {
-        EstartTime = estartTime;
-    }
-
-    public Map<Integer, Integer> getPressureDropConsistencyMapBatterSum() {
-        return pressureDropConsistencyMapBatterSum;
-    }
-
-    public void setPressureDropConsistencyMapBatterSum(Map<Integer, Integer> pressureDropConsistencyMapBatterSum) {
-        this.pressureDropConsistencyMapBatterSum = pressureDropConsistencyMapBatterSum;
-    }
-
-    public Map<Integer, Integer> getVolatilityDetectionMapBatterSum() {
-        return volatilityDetectionMapBatterSum;
-    }
-
-    public void setVolatilityDetectionMapBatterSum(Map<Integer, Integer> volatilityDetectionMapBatterSum) {
-        this.volatilityDetectionMapBatterSum = volatilityDetectionMapBatterSum;
-    }
-
-    public Map<Integer, Integer> getEntropyMapBatterSum() {
-        return EntropyMapBatterSum;
-    }
-
-    public void setEntropyMapBatterSum(Map<Integer, Integer> entropyMapBatterSum) {
-        EntropyMapBatterSum = entropyMapBatterSum;
-    }
-
-    public Integer getPressureDropConsistencySum() {
-        return pressureDropConsistencySum;
-    }
-
-    public void setPressureDropConsistencySum(int num) {
-        this.pressureDropConsistencySum = this.pressureDropConsistencySum + num;
-    }
-
-    public Integer getVolatilityDetectionSum() {
-        return volatilityDetectionSum;
-    }
-
-    public void setVolatilityDetectionSum(int num) {
-        this.volatilityDetectionSum = this.volatilityDetectionSum + num;
-    }
-
-    public Integer getEntropySum() {
-        return EntropySum;
-    }
-
-    public void setEntropySum(int num) {
-        this.EntropySum = this.EntropySum + num;
-    }
-
-    public Map<Long, Map<Integer, Integer>> getEntropyMapDay() {
-        return EntropyMapDay;
-    }
-
-    public void setEntropyMapDay(Map<Long, Map<Integer, Integer>> entropyMapDay) {
-        EntropyMapDay = entropyMapDay;
-    }
-
-    public Map<Long, Map<Integer, Integer>> getEntropyMapWeek() {
-        return EntropyMapWeek;
-    }
-
-    public void setEntropyMapWeek(Map<Long, Map<Integer, Integer>> entropyMapWeek) {
-        EntropyMapWeek = entropyMapWeek;
-    }
-
-    public Map<Long, Map<Integer, Integer>> getPressureDropConsistencyMapWeek() {
-        return pressureDropConsistencyMapWeek;
-    }
-
-    public void setPressureDropConsistencyMapWeek(Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapWeek) {
-        this.pressureDropConsistencyMapWeek = pressureDropConsistencyMapWeek;
-    }
-
-    public Map<Long, Map<Integer, Integer>> getVolatilityDetectionMapDay() {
-        return volatilityDetectionMapDay;
-    }
-
-    public void setVolatilityDetectionMapDay(Map<Long, Map<Integer, Integer>> volatilityDetectionMapDay) {
-        this.volatilityDetectionMapDay = volatilityDetectionMapDay;
-    }
-
-    public Map<Long, Map<Integer, Integer>> getVolatilityDetectionMapWeek() {
-        return volatilityDetectionMapWeek;
-    }
-
-    public void setVolatilityDetectionMapWeek(Map<Long, Map<Integer, Integer>> volatilityDetectionMapWeek) {
-        this.volatilityDetectionMapWeek = volatilityDetectionMapWeek;
-    }
-
-    public String getNowTime() {
-        return nowTime;
-    }
-
-    public void setNowTime(String nowTime) {
-        this.nowTime = nowTime;
-    }
-
-    public String getVIN() {
-        return VIN;
-    }
-
-    public void setVIN(String VIN) {
-        this.VIN = VIN;
-    }
-
-    public Map<Long, Map<Integer, Integer>> getPressureDropConsistencyMapDay() {
-        return pressureDropConsistencyMapDay;
-    }
-
-    public void setPressureDropConsistencyMapDay(Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapDay) {
-        this.pressureDropConsistencyMapDay = pressureDropConsistencyMapDay;
-    }
-
-
-    public int getBatteryNum() {
-        return BatteryNum;
-    }
-
-    public void setBatteryNum(int batteryNum) {
-        BatteryNum = batteryNum;
-    }
-
-    public List<String> getVolatilityDetectionList() {
-        return volatilityDetectionList;
-    }
-
-    public void setVolatilityDetectionList(List<String> volatilityDetectionList) {
-        this.volatilityDetectionList = volatilityDetectionList;
-    }
-
-    public List<String> getPressureDropConsistencyList() {
-        return pressureDropConsistencyList;
-    }
-
-    public void setPressureDropConsistencyList(List<String> pressureDropConsistencyList) {
-        this.pressureDropConsistencyList = pressureDropConsistencyList;
-    }
-
-    public List<String> getEntropyList() {
-        return entropyList;
-    }
-
-    public void setEntropyList(List<String> entropyList) {
-        this.entropyList = entropyList;
-    }
-
-
-    private static DecimalFormat df = new DecimalFormat("0.000000000");
+    private DecimalFormat df = new DecimalFormat("0.000000000");
 
     /**
      * 最后结果输出天
