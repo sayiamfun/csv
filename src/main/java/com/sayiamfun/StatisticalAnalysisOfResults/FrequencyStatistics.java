@@ -208,7 +208,7 @@ public class FrequencyStatistics {
         BaseWriteToCSV(outPath, this, volatilityDetectionMapWeek, "_波动一致性故障诊断模型_", "周");
         Map<Long, Map<Integer, Integer>> volatilityDetectionMapNums = this.getVolatilityDetectionMapNums();
         if (null == volatilityDetectionMapNums || volatilityDetectionMapNums.size() == 0) return;
-        BaseWriteToCSV(outPath, this, volatilityDetectionMapNums, "_波动一致性故障诊断模型_", "每"+this.getVolatilityNums()+"帧");
+        BaseWriteToCSV(outPath, this, volatilityDetectionMapNums, "_波动一致性故障诊断模型_", "每" + this.getVolatilityNums() + "帧");
 
         ResultWriteToCsv(outPath, this, this.getVolatilityDetectionMapBatterSum(), "_波动一致性故障诊断模型_", this.getVolatilityDetectionSum());
         ResultWriteToCsvWeek(outPath, this, this.getVolatilityDetectionMapWeek(), "_波动一致性故障诊断模型_");
@@ -226,7 +226,7 @@ public class FrequencyStatistics {
         BaseWriteToCSV(outPath, this, pressureDropConsistencyMapWeek, "_压降一致性故障诊断模型_", "周");
         Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapNums = this.getPressureDropConsistencyMapNums();
         if (null == pressureDropConsistencyMapNums || pressureDropConsistencyMapNums.size() == 0) return;
-        BaseWriteToCSV(outPath, this, pressureDropConsistencyMapNums, "_压降一致性故障诊断模型_", "每"+this.getPressureNums()+"帧");
+        BaseWriteToCSV(outPath, this, pressureDropConsistencyMapNums, "_压降一致性故障诊断模型_", "每" + this.getPressureNums() + "帧");
 
         ResultWriteToCsv(outPath, this, this.getPressureDropConsistencyMapBatterSum(), "_压降一致性故障诊断模型_", this.getPressureDropConsistencySum());
         ResultWriteToCsvWeek(outPath, this, this.getPressureDropConsistencyMapWeek(), "_压降一致性故障诊断模型_");
@@ -245,7 +245,7 @@ public class FrequencyStatistics {
         BaseWriteToCSV(outPath, this, entropyMapWeek, "_熵值故障诊断模型_", "周");
         Map<Long, Map<Integer, Integer>> entropyMapNums = this.getEntropyMapNums();
         if (null == entropyMapNums || entropyMapNums.size() == 0) return;
-        BaseWriteToCSV(outPath, this, entropyMapNums, "_熵值故障诊断模型_", "每"+this.getEntropyNums()+"帧");
+        BaseWriteToCSV(outPath, this, entropyMapNums, "_熵值故障诊断模型_", "每" + this.getEntropyNums() + "帧");
 
         ResultWriteToCsv(outPath, this, this.getEntropyMapBatterSum(), "_熵值故障诊断模型_", this.getEntropySum());
         ResultWriteToCsvWeek(outPath, this, this.getEntropyMapWeek(), "_熵值故障诊断模型_");
@@ -282,96 +282,66 @@ public class FrequencyStatistics {
      * 输出图表
      */
     public void outIcon(String outPath) {
-        if(null == this.getVIN()) return;
-        CharReport_ZXT.PieChart("熵值故障诊断模型-全生命周期异常率", this.getEntropyMapBatterSum(), outPath + "/" + this.getVIN() + "EARate.png");
-        CharReport_ZXT.PieChart("波动一致性故障诊断模型-全生命周期异常率", this.getVolatilityDetectionMapBatterSum(), outPath + "/" + this.getVIN() + "VARate.png");
-        CharReport_ZXT.PieChart("压降一致性故障诊断模型-全生命周期异常率", this.getPressureDropConsistencyMapBatterSum(), outPath + "/" + this.getVIN() + "PARate.png");
+        if (null == this.getVIN()) return;
+        /**
+         * 全生命周期频率
+         */
+        XDocUtil.outLine(XDocUtil.getData(this.getEntropyMapBatterSum(), "熵值故障诊断模型_-全生命周期异常率", this.getEntropySum()), Constant.templatePath, outPath + "/" + this.getVIN() + "EARate.docx");
+        XDocUtil.outLine(XDocUtil.getData(this.getVolatilityDetectionMapBatterSum(), "波动一致性故障诊断模型_-全生命周期异常率", this.getVolatilityDetectionSum()), Constant.templatePath, outPath + "/" + this.getVIN() + "VARate.docx");
+        XDocUtil.outLine(XDocUtil.getData(this.getPressureDropConsistencyMapBatterSum(), "压降一致性故障诊断模型_-全生命周期异常率", this.getPressureDropConsistencySum()), Constant.templatePath, outPath + "/" + this.getVIN() + "PARate.docx");
+        /**
+         * 每周频率
+         */
+        Map<Long, Map<Integer, Double>> weekRate = getWeekRate(this.getEntropyMapWeek());
         if (this.getEntropyMapWeek().size() == 1) {
-            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : this.getEntropyMapWeek().entrySet()) {
-                CharReport_ZXT.PieChart("熵值故障诊断模型-周异常率", longMapEntry.getValue(), outPath + "/" + this.getVIN() + "EWRate.png");
+            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
+                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "熵值故障诊断模型-周异常率"), Constant.templatePath, outPath + "/" + this.getVIN() + "EWRate.docx");
             }
         } else {
-            CharReport_ZXT.createPort("熵值故障诊断模型-周异常率", getWeekRate(this.getEntropyMapWeek()), "频率", outPath + "/" + this.getVIN() + "EWRate.png");
+            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum(),"熵值故障诊断模型-周异常率"), Constant.templatePath2, outPath + "/" + this.getVIN() + "EWRate.docx");
         }
+        weekRate = getWeekRate(this.getVolatilityDetectionMapWeek());
         if (this.getVolatilityDetectionMapWeek().size() == 1) {
-            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : this.getVolatilityDetectionMapWeek().entrySet()) {
-                CharReport_ZXT.PieChart("波动一致性故障诊断模型-周异常率", longMapEntry.getValue(), outPath + "/" + this.getVIN() + "VWRate.png");
+            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
+                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "波动一致性故障诊断模型-周异常率"), Constant.templatePath, outPath + "/" + this.getVIN() + "VWRate.docx");
             }
         } else {
-            CharReport_ZXT.createPort("波动一致性故障诊断模型-周异常率", getWeekRate(this.getVolatilityDetectionMapWeek()), "频率", outPath + "/" + this.getVIN() + "VWRate.png");
+            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum(),"波动一致性故障诊断模型-周异常率"), Constant.templatePath2, outPath + "/" + this.getVIN() + "VWRate.docx");
         }
+        weekRate = getWeekRate(this.getPressureDropConsistencyMapWeek());
         if (this.getPressureDropConsistencyMapWeek().size() == 1) {
-            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : this.getPressureDropConsistencyMapWeek().entrySet()) {
-                CharReport_ZXT.PieChart("压降一致性故障诊断模型-周异常率", longMapEntry.getValue(), outPath + "/" + this.getVIN() + "PWRate.png");
+            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
+                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "压降一致性故障诊断模型-周异常率"), Constant.templatePath, outPath + "/" + this.getVIN() + "PWRate.docx");
             }
         } else {
-            CharReport_ZXT.createPort("压降一致性故障诊断模型-周异常率", getWeekRate(this.getPressureDropConsistencyMapWeek()), "频率", outPath + "/" + this.getVIN() + "PWRate.png");
+            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum(),"压降一致性故障诊断模型-周异常率"), Constant.templatePath2, outPath + "/" + this.getVIN() + "PWRate.docx");
         }
+        /**
+         * 每1500帧次数
+         */
         if (this.getEntropyMapNums().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : this.getEntropyMapNums().entrySet()) {
-                CharReport_ZXT.PieChart("熵值故障诊断模型每" + this.getEntropyNums() + "帧次数", longMapEntry.getValue(), outPath + "/" + this.getVIN() + "EENum.png");
+                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "熵值故障诊断模型每" + this.getEntropyNums() + "帧次数"), Constant.templatePath, outPath + "/" + this.getVIN() + "EENum.docx");
             }
         } else {
-            CharReport_ZXT.createPortInteger("熵值故障诊断模型每" + this.getEntropyNums() + "帧次数", this.getEntropyMapNums(), "频次", outPath + "/" + this.getVIN() + "EENum.png");
+            XDocUtil.outLine(XDocUtil.getData(this.getEntropyMapNums(), this.getBatteryNum(),"熵值故障诊断模型每" + this.getEntropyNums() + "帧次数"), Constant.templatePath2, outPath + "/" + this.getVIN() + "EENum.docx");
         }
         if (this.getVolatilityDetectionMapNums().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : this.getVolatilityDetectionMapNums().entrySet()) {
-                CharReport_ZXT.PieChart("波动一致性故障诊断模型每" + this.getVolatilityNums() + "帧次数", longMapEntry.getValue(), outPath + "/" + this.getVIN() + "VENum.png");
+                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "波动一致性故障诊断模型每" + this.getEntropyNums() + "帧次数"), Constant.templatePath, outPath + "/" + this.getVIN() + "VENum.docx");
             }
         } else {
-            CharReport_ZXT.createPortInteger("波动一致性故障诊断模型每" + this.getVolatilityNums() + "帧次数", this.getVolatilityDetectionMapNums(), "频次", outPath + "/" + this.getVIN() + "VENum.png");
+            XDocUtil.outLine(XDocUtil.getData(this.getVolatilityDetectionMapNums(), this.getBatteryNum(),"波动一致性故障诊断模型每" + this.getEntropyNums() + "帧次数"), Constant.templatePath2, outPath + "/" + this.getVIN() + "VENum.docx");
         }
         if (this.getPressureDropConsistencyMapNums().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : this.getPressureDropConsistencyMapNums().entrySet()) {
-                CharReport_ZXT.PieChart("压降一致性故障诊断模型每" + this.getPressureNums() + "帧次数", longMapEntry.getValue(), outPath + "/" + this.getVIN() + "PENum.png");
+                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "压降一致性故障诊断模型每" + this.getEntropyNums() + "帧次数"), Constant.templatePath, outPath + "/" + this.getVIN() + "PENum.docx");
             }
         } else {
-            CharReport_ZXT.createPortInteger("压降一致性故障诊断模型每" + this.getPressureNums() + "帧次数", this.getPressureDropConsistencyMapNums(), "频次", outPath + "/" + this.getVIN() + "PENum.png");
+            XDocUtil.outLine(XDocUtil.getData(this.getPressureDropConsistencyMapNums(), this.getBatteryNum(),"压降一致性故障诊断模型每" + this.getEntropyNums() + "帧次数"), Constant.templatePath2, outPath + "/" + this.getVIN() + "PENum.docx");
         }
-        pictureToWord(this, outPath);
+        Merge2.merge(outPath);
     }
-
-    /**
-     * 输出图片到word
-     *
-     * @param path
-     */
-    public void pictureToWord(FrequencyStatistics frequencyStatistics, String path) {
-        try {
-            if (!path.endsWith("/")) path += "/";
-            Map<String, Object> datas = new HashMap<>();
-            //标题
-            datas.put("title1", "熵值故障诊断模型-全生命周期异常率");
-            datas.put("title2", "熵值故障诊断模型每" + frequencyStatistics.getEntropyNums() + "帧次数");
-            datas.put("title3", "熵值故障诊断模型-周异常率");
-            datas.put("title4", "压降一致性故障诊断模型-全生命周期异常率");
-            datas.put("title5", "压降一致性故障诊断模型每" + frequencyStatistics.getPressureNums() + "帧次数");
-            datas.put("title6", "压降一致性故障诊断模型-周异常率");
-            datas.put("title7", "波动一致性故障诊断模型-全生命周期异常率");
-            datas.put("title8", "波动一致性故障诊断模型每" + frequencyStatistics.getVolatilityNums() + "帧次数");
-            datas.put("title9", "波动一致性故障诊断模型-周异常率");
-            //本地图片
-            datas.put("localPicture1", new PictureRenderData(600, 300, path + this.getVIN() + "EARate.png"));
-            datas.put("localPicture2", new PictureRenderData(600, 300, path + this.getVIN() + "EENum.png"));
-            datas.put("localPicture3", new PictureRenderData(600, 300, path + this.getVIN() + "EWRate.png"));
-            datas.put("localPicture4", new PictureRenderData(600, 300, path + this.getVIN() + "PARate.png"));
-            datas.put("localPicture5", new PictureRenderData(600, 300, path + this.getVIN() + "PENum.png"));
-            datas.put("localPicture6", new PictureRenderData(600, 300, path + this.getVIN() + "PWRate.png"));
-            datas.put("localPicture7", new PictureRenderData(600, 300, path + this.getVIN() + "VARate.png"));
-            datas.put("localPicture8", new PictureRenderData(600, 300, path + this.getVIN() + "VENum.png"));
-            datas.put("localPicture9", new PictureRenderData(600, 300, path + this.getVIN() + "VWRate.png"));
-            //datas.put("urlPicture", new PictureRenderData(100, 100, ".png", BytePictureUtils.getUrlByteArray("https://avatars3.githubusercontent.com/u/1394854?v=3&s=40")));
-            XWPFTemplate template = XWPFTemplate.compile(Constant.templatePath).render(datas);
-            FileOutputStream out = new FileOutputStream(path + "0_"+this.getVIN()+"_统计图.docx");
-            template.write(out);
-            out.flush();
-            out.close();
-            template.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * 处理熵值故障诊断模型数据
      *
@@ -452,7 +422,7 @@ public class FrequencyStatistics {
                         tmpMapWeek.put(integerIntegerEntry.getKey(), integerIntegerEntry.getValue());
                     }
                     //所有单体次数
-                    setEntropySum(integerIntegerEntry.getValue());
+                    setEntropySum(getEntropySum() + integerIntegerEntry.getValue());
                     //每个单体次数
                     if (this.getEntropyMapBatterSum().containsKey(integerIntegerEntry.getKey())) {
                         this.getEntropyMapBatterSum().put(integerIntegerEntry.getKey(), this.getEntropyMapBatterSum().get(integerIntegerEntry.getKey()) + integerIntegerEntry.getValue());
@@ -580,7 +550,7 @@ public class FrequencyStatistics {
                         tmpMapWeek.put(integerIntegerEntry.getKey(), integerIntegerEntry.getValue());
                     }
                     //所有单体次数
-                    setPressureDropConsistencySum(integerIntegerEntry.getValue());
+                    setPressureDropConsistencySum(getPressureDropConsistencySum() + integerIntegerEntry.getValue());
                     //每个单体次数
                     if (this.getPressureDropConsistencyMapBatterSum().containsKey(integerIntegerEntry.getKey())) {
                         this.getPressureDropConsistencyMapBatterSum().put(integerIntegerEntry.getKey(), this.getPressureDropConsistencyMapBatterSum().get(integerIntegerEntry.getKey()) + integerIntegerEntry.getValue());
@@ -674,7 +644,7 @@ public class FrequencyStatistics {
                         tmpMapWeek.put(integerIntegerEntry.getKey(), integerIntegerEntry.getValue());
                     }
                     //所有单体异常次数
-                    setVolatilityDetectionSum(integerIntegerEntry.getValue());
+                    setVolatilityDetectionSum(getVolatilityDetectionSum() + integerIntegerEntry.getValue());
                     //每个单体次数
                     if (this.getVolatilityDetectionMapBatterSum().containsKey(integerIntegerEntry.getKey())) {
                         this.getVolatilityDetectionMapBatterSum().put(integerIntegerEntry.getKey(), this.getVolatilityDetectionMapBatterSum().get(integerIntegerEntry.getKey()) + integerIntegerEntry.getValue());

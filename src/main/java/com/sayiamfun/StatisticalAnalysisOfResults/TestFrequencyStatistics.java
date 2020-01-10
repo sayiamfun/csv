@@ -5,7 +5,9 @@ import com.sayiamfun.common.ScanPackage;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-
+/**
+ * 测试 统计图表
+ */
 public class TestFrequencyStatistics {
 
 
@@ -74,8 +76,6 @@ public class TestFrequencyStatistics {
             stringFrequencyStatisticsEntry.getValue().outEntropy(outPath);
             stringFrequencyStatisticsEntry.getValue().outIcon(outPath);
         }
-
-
     }
 
 }
