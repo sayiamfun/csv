@@ -11,7 +11,7 @@ import java.util.*;
 public class TestFrequencyStatistics {
 
 
-    static String inpath = "C:\\Users\\liwenjie\\Downloads\\20200108171936/";
+    static String inpath = "C:\\Users\\liwenjie\\Downloads\\20200110131410/";
     static String outPath = inpath + "out/";
 
     public static void main(String[] args) {
@@ -56,7 +56,6 @@ public class TestFrequencyStatistics {
                 }
                 map.put(vin, frequencyStatistics);
             }
-
         }
         for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map.entrySet()) {
             //开始处理压降一致性数据   因为需要获取单体数量
