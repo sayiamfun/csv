@@ -52,21 +52,22 @@ public class FrequencyStatistics {
 
     /**
      * 最后结果输出天
-     *
-     * @param frequencyStatistics
-     * @param s
+     * @param filename 输出文件名字
+     * @param pressureDropConsistencyMapBatterSum  输出内容
+     * @param s 模型名
+     * @param sum 频次总和
      */
-    private void ResultWriteToCsv(String filename, FrequencyStatistics frequencyStatistics, Map<Integer, Integer> pressureDropConsistencyMapBatterSum, String s, Integer sum) {
+    private void ResultWriteToCsv(String filename, Map<Integer, Integer> pressureDropConsistencyMapBatterSum, String s, Integer sum) {
         OutputStreamWriter ow = null;
         BufferedWriter bw = null;
         try {
             df.setRoundingMode(RoundingMode.HALF_UP);
-            filename = filename + "/0_" + frequencyStatistics.getVIN() + "_" + s + "-全生命周期异常率.csv";
+            filename = filename + "/0_" + this.getVIN() + "_" + s + "-全生命周期异常率.csv";
             ow = new OutputStreamWriter(new FileOutputStream(new File(filename), true), encode);
             bw = new BufferedWriter(ow);
             bw.write("单体编号,全生命周期(率)"); //中间，隔开不同的单元格，一次写一行
             bw.newLine();
-            for (int i = 0; i < frequencyStatistics.getBatteryNum(); i++) {
+            for (int i = 0; i < this.getBatteryNum(); i++) {
                 bw.write("" + (i + 1) + "," + getDouble(pressureDropConsistencyMapBatterSum.get(i + 1), sum));
                 bw.newLine();
             }
@@ -81,18 +82,17 @@ public class FrequencyStatistics {
             }
         }
     }
-
     /**
      * 最后结果输出周
-     *
-     * @param frequencyStatistics
+     * @param filename
+     * @param pressureDropConsistencyMapWeek
      * @param s
      */
-    private void ResultWriteToCsvWeek(String filename, FrequencyStatistics frequencyStatistics, Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapWeek, String s) {
+    private void ResultWriteToCsvWeek(String filename, Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapWeek, String s) {
         OutputStreamWriter ow = null;
         BufferedWriter bw = null;
         try {
-            filename = filename + "/0_" + frequencyStatistics.getVIN() + "_" + s + "-周异常率.csv";
+            filename = filename + "/0_" + this.getVIN() + "_" + s + "-周异常率.csv";
             ow = new OutputStreamWriter(new FileOutputStream(new File(filename), true), encode);
             bw = new BufferedWriter(ow);
             Map<Long, Integer> sumMap = new HashMap<>();
@@ -112,7 +112,7 @@ public class FrequencyStatistics {
             }
             bw.write(title.toString());
             bw.newLine();//中间，隔开不同的单元格，一次写一行
-            for (int i = 0; i < frequencyStatistics.getBatteryNum(); i++) {
+            for (int i = 0; i < this.getBatteryNum(); i++) {
                 StringBuffer text = new StringBuffer(1000);
                 text.append(i + 1);
                 for (Long aLong : longs) {
@@ -132,7 +132,6 @@ public class FrequencyStatistics {
             }
         }
     }
-
     /**
      * 两数相除
      *
@@ -147,17 +146,14 @@ public class FrequencyStatistics {
         }
         return df.format(integer.doubleValue() / pressureDropConsistencySum);
     }
-
-
     /**
      * 基础数据输出
      *
-     * @param frequencyStatistics       输出对象
      * @param volatilityDetectionMapDay 输出数据
      * @param s                         模型名称
      * @param s1                        前缀  日统计/周统计
      */
-    private void BaseWriteToCSV(String filename, FrequencyStatistics frequencyStatistics, Map<Long, Map<Integer, Integer>> volatilityDetectionMapDay, String s, String s1) {
+    private void BaseWriteToCSV(String filename, Map<Long, Map<Integer, Integer>> volatilityDetectionMapDay, String s, String s1) {
         Set<Long> longs = volatilityDetectionMapDay.keySet();
         //写表头
         StringBuffer title = new StringBuffer(1000);
@@ -168,13 +164,13 @@ public class FrequencyStatistics {
         OutputStreamWriter ow = null;
         BufferedWriter bw = null;
         try {
-            filename = filename + "/0_" + this.getVIN() + "_频次" + s1 + "统计_" + s + frequencyStatistics.getNowTime() + ".csv";
+            filename = filename + "/0_" + this.getVIN() + "_频次" + s1 + "统计_" + s + this.getNowTime() + ".csv";
             ow = new OutputStreamWriter(new FileOutputStream(new File(filename)), encode);
             bw = new BufferedWriter(ow);
             bw.write(title.toString()); //中间，隔开不同的单元格，一次写一行
             bw.newLine();
 
-            for (int i = 0; i < frequencyStatistics.getBatteryNum(); i++) {
+            for (int i = 0; i < this.getBatteryNum(); i++) {
                 StringBuffer content = new StringBuffer(1000);
                 content.append(i + 1);
                 for (Long aLong : longs) {
@@ -195,62 +191,58 @@ public class FrequencyStatistics {
         }
 
     }
-
     /**
      * 输出波动一致性每天数据
      */
     public void outVolatilityDetection(String outPath) {
         Map<Long, Map<Integer, Integer>> volatilityDetectionMapDay = this.getVolatilityDetectionMapDay();
         if (null == volatilityDetectionMapDay || volatilityDetectionMapDay.size() == 0) return;
-        BaseWriteToCSV(outPath, this, volatilityDetectionMapDay, "_波动一致性故障诊断模型_", "日");
+        BaseWriteToCSV(outPath,volatilityDetectionMapDay, "_波动一致性故障诊断模型_", "日");
         Map<Long, Map<Integer, Integer>> volatilityDetectionMapWeek = this.getVolatilityDetectionMapWeek();
         if (null == volatilityDetectionMapDay || volatilityDetectionMapDay.size() == 0) return;
-        BaseWriteToCSV(outPath, this, volatilityDetectionMapWeek, "_波动一致性故障诊断模型_", "周");
+        BaseWriteToCSV(outPath, volatilityDetectionMapWeek, "_波动一致性故障诊断模型_", "周");
         Map<Long, Map<Integer, Integer>> volatilityDetectionMapNums = this.getVolatilityDetectionMapNums();
         if (null == volatilityDetectionMapNums || volatilityDetectionMapNums.size() == 0) return;
-        BaseWriteToCSV(outPath, this, volatilityDetectionMapNums, "_波动一致性故障诊断模型_", "每" + this.getVolatilityNums() + "帧");
+        BaseWriteToCSV(outPath, volatilityDetectionMapNums, "_波动一致性故障诊断模型_", "每" + this.getVolatilityNums() + "帧");
 
-        ResultWriteToCsv(outPath, this, this.getVolatilityDetectionMapBatterSum(), "_波动一致性故障诊断模型_", this.getVolatilityDetectionSum());
-        ResultWriteToCsvWeek(outPath, this, this.getVolatilityDetectionMapWeek(), "_波动一致性故障诊断模型_");
+        ResultWriteToCsv(outPath, this.getVolatilityDetectionMapBatterSum(), "_波动一致性故障诊断模型_", this.getVolatilityDetectionSum());
+        ResultWriteToCsvWeek(outPath, this.getVolatilityDetectionMapWeek(), "_波动一致性故障诊断模型_");
     }
-
     /**
      * 输出压降一致性每天数据
      */
     public void outPressureDropConsistency(String outPath) {
         Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapDay = this.getPressureDropConsistencyMapDay();
         if (null == pressureDropConsistencyMapDay || pressureDropConsistencyMapDay.size() == 0) return;
-        BaseWriteToCSV(outPath, this, pressureDropConsistencyMapDay, "_压降一致性故障诊断模型_", "日");
+        BaseWriteToCSV(outPath, pressureDropConsistencyMapDay, "_压降一致性故障诊断模型_", "日");
         Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapWeek = this.getPressureDropConsistencyMapWeek();
         if (null == pressureDropConsistencyMapWeek || pressureDropConsistencyMapWeek.size() == 0) return;
-        BaseWriteToCSV(outPath, this, pressureDropConsistencyMapWeek, "_压降一致性故障诊断模型_", "周");
+        BaseWriteToCSV(outPath, pressureDropConsistencyMapWeek, "_压降一致性故障诊断模型_", "周");
         Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapNums = this.getPressureDropConsistencyMapNums();
         if (null == pressureDropConsistencyMapNums || pressureDropConsistencyMapNums.size() == 0) return;
-        BaseWriteToCSV(outPath, this, pressureDropConsistencyMapNums, "_压降一致性故障诊断模型_", "每" + this.getPressureNums() + "帧");
+        BaseWriteToCSV(outPath, pressureDropConsistencyMapNums, "_压降一致性故障诊断模型_", "每" + this.getPressureNums() + "帧");
 
-        ResultWriteToCsv(outPath, this, this.getPressureDropConsistencyMapBatterSum(), "_压降一致性故障诊断模型_", this.getPressureDropConsistencySum());
-        ResultWriteToCsvWeek(outPath, this, this.getPressureDropConsistencyMapWeek(), "_压降一致性故障诊断模型_");
+        ResultWriteToCsv(outPath,this.getPressureDropConsistencyMapBatterSum(), "_压降一致性故障诊断模型_", this.getPressureDropConsistencySum());
+        ResultWriteToCsvWeek(outPath, this.getPressureDropConsistencyMapWeek(), "_压降一致性故障诊断模型_");
 
     }
-
     /**
      * 输出熵值每天数据
      */
     public void outEntropy(String outPath) {
         Map<Long, Map<Integer, Integer>> entropyMapDay = this.getEntropyMapDay();
         if (null == entropyMapDay || entropyMapDay.size() == 0) return;
-        BaseWriteToCSV(outPath, this, entropyMapDay, "_熵值故障诊断模型_", "日");
+        BaseWriteToCSV(outPath, entropyMapDay, "_熵值故障诊断模型_", "日");
         Map<Long, Map<Integer, Integer>> entropyMapWeek = this.getEntropyMapWeek();
         if (null == entropyMapWeek || entropyMapWeek.size() == 0) return;
-        BaseWriteToCSV(outPath, this, entropyMapWeek, "_熵值故障诊断模型_", "周");
+        BaseWriteToCSV(outPath, entropyMapWeek, "_熵值故障诊断模型_", "周");
         Map<Long, Map<Integer, Integer>> entropyMapNums = this.getEntropyMapNums();
         if (null == entropyMapNums || entropyMapNums.size() == 0) return;
-        BaseWriteToCSV(outPath, this, entropyMapNums, "_熵值故障诊断模型_", "每" + this.getEntropyNums() + "帧");
+        BaseWriteToCSV(outPath, entropyMapNums, "_熵值故障诊断模型_", "每" + this.getEntropyNums() + "帧");
 
-        ResultWriteToCsv(outPath, this, this.getEntropyMapBatterSum(), "_熵值故障诊断模型_", this.getEntropySum());
-        ResultWriteToCsvWeek(outPath, this, this.getEntropyMapWeek(), "_熵值故障诊断模型_");
+        ResultWriteToCsv(outPath, this.getEntropyMapBatterSum(), "_熵值故障诊断模型_", this.getEntropySum());
+        ResultWriteToCsvWeek(outPath, this.getEntropyMapWeek(), "_熵值故障诊断模型_");
     }
-
     /**
      * 获取每周的频率
      *
@@ -367,7 +359,7 @@ public class FrequencyStatistics {
             Map<Integer, Integer> tmpMap = new TreeMap<>(); //存放一天的数据
             for (List<String> list : lists) {
                 if (new BigDecimal(list.get(9)).compareTo(new BigDecimal("4")) > 0) {
-                    if (null != list.get(8)) {
+                    if (null == list.get(8)) continue;
                         /**
                          * 天数据
                          */
@@ -394,7 +386,6 @@ public class FrequencyStatistics {
                             nums = 0;
                             index++;
                         }
-                    }
                 }
             }
             /**
