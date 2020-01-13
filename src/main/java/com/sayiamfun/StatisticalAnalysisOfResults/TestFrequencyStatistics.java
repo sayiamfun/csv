@@ -11,7 +11,7 @@ import java.util.*;
 public class TestFrequencyStatistics {
 
 
-    static String inpath = "C:\\Users\\liwenjie\\Downloads\\20200110131410/";
+    static String inpath = "C:\\Users\\liwenjie\\Downloads\\20200113094430/";
     static String outPath = inpath + "out/";
 
     public static void main(String[] args) {
@@ -75,6 +75,7 @@ public class TestFrequencyStatistics {
             stringFrequencyStatisticsEntry.getValue().outEntropy(outPath);
             stringFrequencyStatisticsEntry.getValue().outIcon(outPath);
         }
+        System.out.println("-----------------------结束-------------------------------");
     }
 
 }

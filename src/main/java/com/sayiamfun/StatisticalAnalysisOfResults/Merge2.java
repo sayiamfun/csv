@@ -10,7 +10,7 @@ import java.io.File;
  */
 public class Merge2 {
 
-    public static void merge(String outPath, String vin) {
+    public static void merge(String outPath, String vin, FrequencyStatistics frequencyStatistics) {
         Document doc0 = null;
         Document doc1 = null;
         Document doc2 = null;
@@ -35,8 +35,11 @@ public class Merge2 {
         //加载需要合并的两个文档
         doc0 = new Document(file0);
         Section lastsec = doc0.getLastSection();
-        if(new File(fil1).exists()) {
+        //获取文档1的最后一节
+        //遍历文档2的所有段落内容，添加到文档1
+        if (new File(fil1).exists()) {
             doc1 = new Document(fil1);
+            doc1.replace("***", "熵值故障诊断模型_-全生命周期异常率", false, true);
             for (Section section : (Iterable<Section>) doc1.getSections()) {
                 for (DocumentObject obj : (Iterable<DocumentObject>) section.getBody().getChildObjects()
                 ) {
@@ -44,10 +47,9 @@ public class Merge2 {
                 }
             }
         }
-        if(new File(fil2).exists()) {
+        if (new File(fil2).exists()) {
             doc2 = new Document(fil2);
-            //获取文档1的最后一节
-            //遍历文档2的所有段落内容，添加到文档1
+            doc2.replace("***", "熵值故障诊断模型每" + frequencyStatistics.getEntropyNums() + "帧次数", false, true);
             for (Section section : (Iterable<Section>) doc2.getSections()) {
                 for (DocumentObject obj : (Iterable<DocumentObject>) section.getBody().getChildObjects()
                 ) {
@@ -55,8 +57,9 @@ public class Merge2 {
                 }
             }
         }
-        if(new File(fil3).exists()) {
+        if (new File(fil3).exists()) {
             doc3 = new Document(fil3);
+            doc3.replace("***", "熵值故障诊断模型-周异常率", false, true);
             lastsec = doc0.getLastSection();
             for (Section section : (Iterable<Section>) doc3.getSections()) {
                 for (DocumentObject obj : (Iterable<DocumentObject>) section.getBody().getChildObjects()
@@ -65,8 +68,9 @@ public class Merge2 {
                 }
             }
         }
-        if(new File(fil4).exists()) {
+        if (new File(fil4).exists()) {
             doc4 = new Document(fil4);
+            doc4.replace("***", "压降一致性故障诊断模型_-全生命周期异常率", false, true);
             lastsec = doc0.getLastSection();
             for (Section section : (Iterable<Section>) doc4.getSections()) {
                 for (DocumentObject obj : (Iterable<DocumentObject>) section.getBody().getChildObjects()
@@ -75,8 +79,9 @@ public class Merge2 {
                 }
             }
         }
-        if(new File(fil5).exists()) {
+        if (new File(fil5).exists()) {
             doc5 = new Document(fil5);
+            doc5.replace("***", "压降一致性故障诊断模型每" + frequencyStatistics.getEntropyNums() + "帧次数", false, true);
             lastsec = doc0.getLastSection();
             for (Section section : (Iterable<Section>) doc5.getSections()) {
                 for (DocumentObject obj : (Iterable<DocumentObject>) section.getBody().getChildObjects()
@@ -85,8 +90,9 @@ public class Merge2 {
                 }
             }
         }
-        if(new File(fil6).exists()) {
+        if (new File(fil6).exists()) {
             doc6 = new Document(fil6);
+            doc6.replace("***", "压降一致性故障诊断模型-周异常率", false, true);
             lastsec = doc0.getLastSection();
             for (Section section : (Iterable<Section>) doc6.getSections()) {
                 for (DocumentObject obj : (Iterable<DocumentObject>) section.getBody().getChildObjects()
@@ -95,8 +101,9 @@ public class Merge2 {
                 }
             }
         }
-        if(new File(fil7).exists()) {
+        if (new File(fil7).exists()) {
             doc7 = new Document(fil7);
+            doc7.replace("***", "波动一致性故障诊断模型_-全生命周期异常率", false, true);
             lastsec = doc0.getLastSection();
             for (Section section : (Iterable<Section>) doc7.getSections()) {
                 for (DocumentObject obj : (Iterable<DocumentObject>) section.getBody().getChildObjects()
@@ -105,8 +112,9 @@ public class Merge2 {
                 }
             }
         }
-        if(new File(fil8).exists()) {
+        if (new File(fil8).exists()) {
             doc8 = new Document(fil8);
+            doc8.replace("***", "波动一致性故障诊断模型每" + frequencyStatistics.getEntropyNums() + "帧次数", false, true);
             lastsec = doc0.getLastSection();
             for (Section section : (Iterable<Section>) doc8.getSections()) {
                 for (DocumentObject obj : (Iterable<DocumentObject>) section.getBody().getChildObjects()
@@ -115,8 +123,9 @@ public class Merge2 {
                 }
             }
         }
-        if(new File(fil9).exists()) {
+        if (new File(fil9).exists()) {
             doc9 = new Document(fil9);
+            doc9.replace("***", "波动一致性故障诊断模型-周异常率", false, true);
             lastsec = doc0.getLastSection();
             for (Section section : (Iterable<Section>) doc9.getSections()) {
                 for (DocumentObject obj : (Iterable<DocumentObject>) section.getBody().getChildObjects()
@@ -125,11 +134,14 @@ public class Merge2 {
                 }
             }
         }
-
-        doc0.replace("推荐使用VIP服务器，高速、稳定、无广告！", "", false, true);
-
+        String text = doc0.getText();
+        String[] split = text.split("\n");
+        for (String s1 : split) {
+            if (s1.contains("高速") || s1.contains("稳定") || s1.contains("无广告"))
+                doc0.replace(s1.trim(), "", false, true);
+        }
         //保存合并后的文档
-        doc0.saveToFile(outPath + "/0_" + vin + "_out.docx", FileFormat.Docx_2010);
+        doc0.saveToFile(outPath + "/0_" + vin + "_统计图.docx", FileFormat.Docx_2010);
     }
 
 }

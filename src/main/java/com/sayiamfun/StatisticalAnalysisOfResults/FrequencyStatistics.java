@@ -279,13 +279,13 @@ public class FrequencyStatistics {
          * 全生命周期频率
          */
         if (this.getEntropyMapBatterSum().size() > 0) {
-            XDocUtil.outLine(XDocUtil.getData(this.getEntropyMapBatterSum(), "熵值故障诊断模型_-全生命周期异常率", this.getEntropySum()), Constant.templatePath, outPath + "/" + this.getVIN() + "EARate.docx");
+            XDocUtil.outLine(XDocUtil.getData(this.getEntropyMapBatterSum(), "异常率", this.getEntropySum()), Constant.templatePath, outPath + "/" + this.getVIN() + "EARate.docx");
         }
         if (this.getVolatilityDetectionMapBatterSum().size() > 0) {
-            XDocUtil.outLine(XDocUtil.getData(this.getVolatilityDetectionMapBatterSum(), "波动一致性故障诊断模型_-全生命周期异常率", this.getVolatilityDetectionSum()), Constant.templatePath, outPath + "/" + this.getVIN() + "VARate.docx");
+            XDocUtil.outLine(XDocUtil.getData(this.getVolatilityDetectionMapBatterSum(), "异常率", this.getVolatilityDetectionSum()), Constant.templatePath, outPath + "/" + this.getVIN() + "VARate.docx");
         }
         if (this.getPressureDropConsistencyMapBatterSum().size() > 0) {
-            XDocUtil.outLine(XDocUtil.getData(this.getPressureDropConsistencyMapBatterSum(), "压降一致性故障诊断模型_-全生命周期异常率", this.getPressureDropConsistencySum()), Constant.templatePath, outPath + "/" + this.getVIN() + "PARate.docx");
+            XDocUtil.outLine(XDocUtil.getData(this.getPressureDropConsistencyMapBatterSum(), "异常率", this.getPressureDropConsistencySum()), Constant.templatePath, outPath + "/" + this.getVIN() + "PARate.docx");
         }
         /**
          * 每周频率
@@ -293,52 +293,52 @@ public class FrequencyStatistics {
         Map<Long, Map<Integer, Double>> weekRate = getWeekRate(this.getEntropyMapWeek());
         if (this.getEntropyMapWeek().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
-                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "熵值故障诊断模型-周异常率"), Constant.templatePath, outPath + "/" + this.getVIN() + "EWRate.docx");
+                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "异常率"), Constant.templatePath, outPath + "/" + this.getVIN() + "EWRate.docx");
             }
         } else if (this.getEntropyMapWeek().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum(), "熵值故障诊断模型-周异常率"), Constant.templatePath2, outPath + "/" + this.getVIN() + "EWRate.docx");
+            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum(), "异常率"), Constant.templatePath2, outPath + "/" + this.getVIN() + "EWRate.docx");
         }
         weekRate = getWeekRate(this.getVolatilityDetectionMapWeek());
         if (this.getVolatilityDetectionMapWeek().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
-                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "波动一致性故障诊断模型-周异常率"), Constant.templatePath, outPath + "/" + this.getVIN() + "VWRate.docx");
+                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "异常率"), Constant.templatePath, outPath + "/" + this.getVIN() + "VWRate.docx");
             }
         } else if (this.getVolatilityDetectionMapWeek().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum(), "波动一致性故障诊断模型-周异常率"), Constant.templatePath2, outPath + "/" + this.getVIN() + "VWRate.docx");
+            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum(), "异常率"), Constant.templatePath2, outPath + "/" + this.getVIN() + "VWRate.docx");
         }
         weekRate = getWeekRate(this.getPressureDropConsistencyMapWeek());
         if (this.getPressureDropConsistencyMapWeek().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
-                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "压降一致性故障诊断模型-周异常率"), Constant.templatePath, outPath + "/" + this.getVIN() + "PWRate.docx");
+                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "异常率"), Constant.templatePath, outPath + "/" + this.getVIN() + "PWRate.docx");
             }
         } else if (this.getPressureDropConsistencyMapWeek().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum(), "压降一致性故障诊断模型-周异常率"), Constant.templatePath2, outPath + "/" + this.getVIN() + "PWRate.docx");
+            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum(), "异常率"), Constant.templatePath2, outPath + "/" + this.getVIN() + "PWRate.docx");
         }
         /**
          * 每1500帧次数
          */
         if (this.getEntropyMapNums().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : this.getEntropyMapNums().entrySet()) {
-                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "熵值故障诊断模型每" + this.getEntropyNums() + "帧次数"), Constant.templatePath, outPath + "/" + this.getVIN() + "EENum.docx");
+                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + "/" + this.getVIN() + "EENum.docx");
             }
         } else if (this.getEntropyMapNums().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getData(this.getEntropyMapNums(), this.getBatteryNum(), "熵值故障诊断模型每" + this.getEntropyNums() + "帧次数"), Constant.templatePath2, outPath + "/" + this.getVIN() + "EENum.docx");
+            XDocUtil.outLine(XDocUtil.getData(this.getEntropyMapNums(), this.getBatteryNum(), "次数"), Constant.templatePath2, outPath + "/" + this.getVIN() + "EENum.docx");
         }
         if (this.getVolatilityDetectionMapNums().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : this.getVolatilityDetectionMapNums().entrySet()) {
-                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "波动一致性故障诊断模型每" + this.getEntropyNums() + "帧次数"), Constant.templatePath, outPath + "/" + this.getVIN() + "VENum.docx");
+                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + "/" + this.getVIN() + "VENum.docx");
             }
         } else if (this.getVolatilityDetectionMapNums().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getData(this.getVolatilityDetectionMapNums(), this.getBatteryNum(), "波动一致性故障诊断模型每" + this.getEntropyNums() + "帧次数"), Constant.templatePath2, outPath + "/" + this.getVIN() + "VENum.docx");
+            XDocUtil.outLine(XDocUtil.getData(this.getVolatilityDetectionMapNums(), this.getBatteryNum(), "次数"), Constant.templatePath2, outPath + "/" + this.getVIN() + "VENum.docx");
         }
         if (this.getPressureDropConsistencyMapNums().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : this.getPressureDropConsistencyMapNums().entrySet()) {
-                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "压降一致性故障诊断模型每" + this.getEntropyNums() + "帧次数"), Constant.templatePath, outPath + "/" + this.getVIN() + "PENum.docx");
+                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + "/" + this.getVIN() + "PENum.docx");
             }
         } else if (this.getPressureDropConsistencyMapNums().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getData(this.getPressureDropConsistencyMapNums(), this.getBatteryNum(), "压降一致性故障诊断模型每" + this.getEntropyNums() + "帧次数"), Constant.templatePath2, outPath + "/" + this.getVIN() + "PENum.docx");
+            XDocUtil.outLine(XDocUtil.getData(this.getPressureDropConsistencyMapNums(), this.getBatteryNum(), "次数"), Constant.templatePath2, outPath + "/" + this.getVIN() + "PENum.docx");
         }
-        Merge2.merge(outPath, this.getVIN());
+        Merge2.merge(outPath, this.getVIN(),this);
     }
     /**
      * 处理熵值故障诊断模型数据
