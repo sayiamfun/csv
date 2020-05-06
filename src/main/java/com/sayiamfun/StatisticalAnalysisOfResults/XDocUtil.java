@@ -73,12 +73,12 @@ public class XDocUtil {
     /**
      * 折线图数据
      */
-    public static String getDoubleData(Map<Long, Map<Integer, Double>> weekMap, int batteryNum,String topic) {
+    public static String getDoubleData(Map<Long, Map<Integer, Double>> weekMap, int batteryNum) {
         Set<Long> longs = weekMap.keySet();
         StringBuffer title = new StringBuffer(1000);
-        title.append("单体编号,"+topic);
+        title.append("单体编号");
         for (int i = 0; i < batteryNum; i++) {
-            title.append(",单体" + i);
+            title.append(",单体" + (i + 1));
         }
         for (Long aLong : longs) {
             title.append("\r\n" + aLong);
@@ -89,7 +89,7 @@ public class XDocUtil {
         return title.toString();
     }
 
-    public static String getData(Map<Long, Map<Integer, Integer>> weekMap, int batteryNum,String topic) {
+    public static String getData(Map<Long, Map<Integer, Integer>> weekMap, int batteryNum) {
         Map<Long, Integer> sumMap = new HashMap<>();
         //计算每个周的数据
         for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : weekMap.entrySet()) {
@@ -101,7 +101,7 @@ public class XDocUtil {
         }
         Set<Long> longs = weekMap.keySet();
         StringBuffer title = new StringBuffer(1000);
-        title.append("单体编号,"+topic);
+        title.append("单体编号");
         for (int i = 0; i < batteryNum; i++) {
             title.append(",单体" + (i + 1));
         }

@@ -3,7 +3,7 @@ package com.sayiamfun.csv;
 import com.sayiamfun.csv.entity.BatteryMonomer;
 import com.sayiamfun.csv.utils.Do;
 import com.sayiamfun.csv.utils.Outs;
-import com.sayiamfun.common.ScanPackage;
+import com.sayiamfun.common.utils.ScanPackage;
 import lombok.Data;
 
 import java.io.*;

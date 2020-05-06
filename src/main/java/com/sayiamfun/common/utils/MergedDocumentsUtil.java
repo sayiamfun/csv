@@ -1,4 +1,4 @@
-package com.sayiamfun.common;
+package com.sayiamfun.common.utils;
 
 import java.io.*;
 import java.text.SimpleDateFormat;

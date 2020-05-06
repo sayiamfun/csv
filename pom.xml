@@ -65,6 +65,26 @@
             <version>1.0.0</version>
         </dependency>
 
+        <!--    kudu    -->
+        <dependency>
+            <groupId>org.apache.kudu</groupId>
+            <artifactId>kudu-client-tools</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+        <!--    Map与对象转换    -->
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.4</version>
+        </dependency>
+        <!--     impala   -->
+        <!-- https://mvnrepository.com/artifact/com.cloudera/ImpalaJDBC41 -->
+        <dependency>
+            <groupId>com.cloudera</groupId>
+            <artifactId>ImpalaJDBC41</artifactId>
+            <version>2.6.3</version>
+        </dependency>
+
     </dependencies>
 
 

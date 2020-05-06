@@ -1,4 +1,4 @@
-package com.sayiamfun.common;
+package com.sayiamfun.common.utils;
 
 import lombok.Data;
 

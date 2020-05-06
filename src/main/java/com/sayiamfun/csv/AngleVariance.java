@@ -1,6 +1,6 @@
 package com.sayiamfun.csv;
 
-import com.sayiamfun.common.ScanPackage;
+import com.sayiamfun.common.utils.ScanPackage;
 
 import java.io.*;
 import java.util.*;

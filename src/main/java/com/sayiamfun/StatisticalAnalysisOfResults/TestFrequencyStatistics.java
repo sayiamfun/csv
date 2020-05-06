@@ -1,6 +1,6 @@
 package com.sayiamfun.StatisticalAnalysisOfResults;
 
-import com.sayiamfun.common.ScanPackage;
+import com.sayiamfun.common.utils.ScanPackage;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -11,13 +11,10 @@ import java.util.*;
 public class TestFrequencyStatistics {
 
 
-    static String inpath = "C:\\Users\\liwenjie\\Downloads\\20200113094430/";
+    static String inpath = "C:\\Users\\liwenjie\\Downloads\\20200323091631\\";
     static String outPath = inpath + "out/";
 
     public static void main(String[] args) {
-//        DecimalFormat df = new DecimalFormat("0.000000000");
-//        df.setRoundingMode(RoundingMode.HALF_UP);
-//        System.out.println(","+df.format(0.00904985));
         test();
     }
 
@@ -47,6 +44,7 @@ public class TestFrequencyStatistics {
                 }
             } else {
                 FrequencyStatistics frequencyStatistics = new FrequencyStatistics();
+                frequencyStatistics.setVIN(vin);
                 if (string.contains("压降一致性故障诊断模型")) {
                     frequencyStatistics.getPressureDropConsistencyList().add(string);
                 } else if (string.contains("波动一致性故障诊断模型")) {

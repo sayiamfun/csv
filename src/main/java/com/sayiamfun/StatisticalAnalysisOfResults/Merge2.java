@@ -141,7 +141,7 @@ public class Merge2 {
                 doc0.replace(s1.trim(), "", false, true);
         }
         //保存合并后的文档
-        doc0.saveToFile(outPath + "/0_" + vin + "_统计图.docx", FileFormat.Docx_2010);
+        doc0.saveToFile(outPath + "/0_" + vin + "___统计图.docx", FileFormat.Docx_2010);
     }
 
 }

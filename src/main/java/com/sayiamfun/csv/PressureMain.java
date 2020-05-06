@@ -5,11 +5,10 @@ import com.sayiamfun.csv.entity.ThreeValue;
 import com.sayiamfun.csv.entity.ValueEntity;
 import com.sayiamfun.csv.utils.Outs;
 import com.sayiamfun.csv.utils.PressureDropConsistency;
-import com.sayiamfun.common.ScanPackage;
+import com.sayiamfun.common.utils.ScanPackage;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.text.DecimalFormat;
 import java.util.*;

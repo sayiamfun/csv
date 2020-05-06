@@ -52,17 +52,18 @@ public class FrequencyStatistics {
 
     /**
      * 最后结果输出天
-     * @param filename 输出文件名字
-     * @param pressureDropConsistencyMapBatterSum  输出内容
-     * @param s 模型名
-     * @param sum 频次总和
+     *
+     * @param filename                            输出文件名字
+     * @param pressureDropConsistencyMapBatterSum 输出内容
+     * @param s                                   模型名
+     * @param sum                                 频次总和
      */
     private void ResultWriteToCsv(String filename, Map<Integer, Integer> pressureDropConsistencyMapBatterSum, String s, Integer sum) {
         OutputStreamWriter ow = null;
         BufferedWriter bw = null;
         try {
             df.setRoundingMode(RoundingMode.HALF_UP);
-            filename = filename + "/0_" + this.getVIN() + "_" + s + "-全生命周期异常率.csv";
+            filename = filename + "/0_" + this.getVIN() + "__" + s + "-全生命周期异常率.csv";
             ow = new OutputStreamWriter(new FileOutputStream(new File(filename), true), encode);
             bw = new BufferedWriter(ow);
             bw.write("单体编号,全生命周期(率)"); //中间，隔开不同的单元格，一次写一行
@@ -82,8 +83,10 @@ public class FrequencyStatistics {
             }
         }
     }
+
     /**
      * 最后结果输出周
+     *
      * @param filename
      * @param pressureDropConsistencyMapWeek
      * @param s
@@ -92,7 +95,7 @@ public class FrequencyStatistics {
         OutputStreamWriter ow = null;
         BufferedWriter bw = null;
         try {
-            filename = filename + "/0_" + this.getVIN() + "_" + s + "-周异常率.csv";
+            filename = filename + "/0_" + this.getVIN() + "__" + s + "-周异常率.csv";
             ow = new OutputStreamWriter(new FileOutputStream(new File(filename), true), encode);
             bw = new BufferedWriter(ow);
             Map<Long, Integer> sumMap = new HashMap<>();
@@ -132,6 +135,7 @@ public class FrequencyStatistics {
             }
         }
     }
+
     /**
      * 两数相除
      *
@@ -146,6 +150,7 @@ public class FrequencyStatistics {
         }
         return df.format(integer.doubleValue() / pressureDropConsistencySum);
     }
+
     /**
      * 基础数据输出
      *
@@ -164,7 +169,7 @@ public class FrequencyStatistics {
         OutputStreamWriter ow = null;
         BufferedWriter bw = null;
         try {
-            filename = filename + "/0_" + this.getVIN() + "_频次" + s1 + "统计_" + s + this.getNowTime() + ".csv";
+            filename = filename + "/0_" + this.getVIN() + "_频次_" + s1 + "_统计_" + s + "_" + this.getNowTime() + ".csv";
             ow = new OutputStreamWriter(new FileOutputStream(new File(filename)), encode);
             bw = new BufferedWriter(ow);
             bw.write(title.toString()); //中间，隔开不同的单元格，一次写一行
@@ -191,58 +196,62 @@ public class FrequencyStatistics {
         }
 
     }
+
     /**
      * 输出波动一致性每天数据
      */
     public void outVolatilityDetection(String outPath) {
         Map<Long, Map<Integer, Integer>> volatilityDetectionMapDay = this.getVolatilityDetectionMapDay();
         if (null == volatilityDetectionMapDay || volatilityDetectionMapDay.size() == 0) return;
-        BaseWriteToCSV(outPath,volatilityDetectionMapDay, "_波动一致性故障诊断模型_", "日");
+        BaseWriteToCSV(outPath, volatilityDetectionMapDay, "波动一致性故障诊断模型", "日");
         Map<Long, Map<Integer, Integer>> volatilityDetectionMapWeek = this.getVolatilityDetectionMapWeek();
         if (null == volatilityDetectionMapDay || volatilityDetectionMapDay.size() == 0) return;
-        BaseWriteToCSV(outPath, volatilityDetectionMapWeek, "_波动一致性故障诊断模型_", "周");
+        BaseWriteToCSV(outPath, volatilityDetectionMapWeek, "波动一致性故障诊断模型", "周");
         Map<Long, Map<Integer, Integer>> volatilityDetectionMapNums = this.getVolatilityDetectionMapNums();
         if (null == volatilityDetectionMapNums || volatilityDetectionMapNums.size() == 0) return;
-        BaseWriteToCSV(outPath, volatilityDetectionMapNums, "_波动一致性故障诊断模型_", "每" + this.getVolatilityNums() + "帧");
+        BaseWriteToCSV(outPath, volatilityDetectionMapNums, "波动一致性故障诊断模型", "每" + this.getVolatilityNums() + "帧");
 
-        ResultWriteToCsv(outPath, this.getVolatilityDetectionMapBatterSum(), "_波动一致性故障诊断模型_", this.getVolatilityDetectionSum());
-        ResultWriteToCsvWeek(outPath, this.getVolatilityDetectionMapWeek(), "_波动一致性故障诊断模型_");
+        ResultWriteToCsv(outPath, this.getVolatilityDetectionMapBatterSum(), "波动一致性故障诊断模型", this.getVolatilityDetectionSum());
+        ResultWriteToCsvWeek(outPath, this.getVolatilityDetectionMapWeek(), "波动一致性故障诊断模型");
     }
+
     /**
      * 输出压降一致性每天数据
      */
     public void outPressureDropConsistency(String outPath) {
         Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapDay = this.getPressureDropConsistencyMapDay();
         if (null == pressureDropConsistencyMapDay || pressureDropConsistencyMapDay.size() == 0) return;
-        BaseWriteToCSV(outPath, pressureDropConsistencyMapDay, "_压降一致性故障诊断模型_", "日");
+        BaseWriteToCSV(outPath, pressureDropConsistencyMapDay, "压降一致性故障诊断模型", "日");
         Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapWeek = this.getPressureDropConsistencyMapWeek();
         if (null == pressureDropConsistencyMapWeek || pressureDropConsistencyMapWeek.size() == 0) return;
-        BaseWriteToCSV(outPath, pressureDropConsistencyMapWeek, "_压降一致性故障诊断模型_", "周");
+        BaseWriteToCSV(outPath, pressureDropConsistencyMapWeek, "压降一致性故障诊断模型", "周");
         Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapNums = this.getPressureDropConsistencyMapNums();
         if (null == pressureDropConsistencyMapNums || pressureDropConsistencyMapNums.size() == 0) return;
-        BaseWriteToCSV(outPath, pressureDropConsistencyMapNums, "_压降一致性故障诊断模型_", "每" + this.getPressureNums() + "帧");
+        BaseWriteToCSV(outPath, pressureDropConsistencyMapNums, "压降一致性故障诊断模型", "每" + this.getPressureNums() + "帧");
 
-        ResultWriteToCsv(outPath,this.getPressureDropConsistencyMapBatterSum(), "_压降一致性故障诊断模型_", this.getPressureDropConsistencySum());
-        ResultWriteToCsvWeek(outPath, this.getPressureDropConsistencyMapWeek(), "_压降一致性故障诊断模型_");
+        ResultWriteToCsv(outPath, this.getPressureDropConsistencyMapBatterSum(), "压降一致性故障诊断模型", this.getPressureDropConsistencySum());
+        ResultWriteToCsvWeek(outPath, this.getPressureDropConsistencyMapWeek(), "压降一致性故障诊断模型");
 
     }
+
     /**
      * 输出熵值每天数据
      */
     public void outEntropy(String outPath) {
         Map<Long, Map<Integer, Integer>> entropyMapDay = this.getEntropyMapDay();
         if (null == entropyMapDay || entropyMapDay.size() == 0) return;
-        BaseWriteToCSV(outPath, entropyMapDay, "_熵值故障诊断模型_", "日");
+        BaseWriteToCSV(outPath, entropyMapDay, "熵值故障诊断模型", "日");
         Map<Long, Map<Integer, Integer>> entropyMapWeek = this.getEntropyMapWeek();
         if (null == entropyMapWeek || entropyMapWeek.size() == 0) return;
-        BaseWriteToCSV(outPath, entropyMapWeek, "_熵值故障诊断模型_", "周");
+        BaseWriteToCSV(outPath, entropyMapWeek, "熵值故障诊断模型", "周");
         Map<Long, Map<Integer, Integer>> entropyMapNums = this.getEntropyMapNums();
         if (null == entropyMapNums || entropyMapNums.size() == 0) return;
-        BaseWriteToCSV(outPath, entropyMapNums, "_熵值故障诊断模型_", "每" + this.getEntropyNums() + "帧");
+        BaseWriteToCSV(outPath, entropyMapNums, "熵值故障诊断模型", "每" + this.getEntropyNums() + "帧");
 
-        ResultWriteToCsv(outPath, this.getEntropyMapBatterSum(), "_熵值故障诊断模型_", this.getEntropySum());
-        ResultWriteToCsvWeek(outPath, this.getEntropyMapWeek(), "_熵值故障诊断模型_");
+        ResultWriteToCsv(outPath, this.getEntropyMapBatterSum(), "熵值故障诊断模型", this.getEntropySum());
+        ResultWriteToCsvWeek(outPath, this.getEntropyMapWeek(), "熵值故障诊断模型");
     }
+
     /**
      * 获取每周的频率
      *
@@ -296,7 +305,7 @@ public class FrequencyStatistics {
                 XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "异常率"), Constant.templatePath, outPath + "/" + this.getVIN() + "EWRate.docx");
             }
         } else if (this.getEntropyMapWeek().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum(), "异常率"), Constant.templatePath2, outPath + "/" + this.getVIN() + "EWRate.docx");
+            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum()), Constant.templatePath2, outPath + "/" + this.getVIN() + "EWRate.docx");
         }
         weekRate = getWeekRate(this.getVolatilityDetectionMapWeek());
         if (this.getVolatilityDetectionMapWeek().size() == 1) {
@@ -304,7 +313,7 @@ public class FrequencyStatistics {
                 XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "异常率"), Constant.templatePath, outPath + "/" + this.getVIN() + "VWRate.docx");
             }
         } else if (this.getVolatilityDetectionMapWeek().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum(), "异常率"), Constant.templatePath2, outPath + "/" + this.getVIN() + "VWRate.docx");
+            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum()), Constant.templatePath2, outPath + "/" + this.getVIN() + "VWRate.docx");
         }
         weekRate = getWeekRate(this.getPressureDropConsistencyMapWeek());
         if (this.getPressureDropConsistencyMapWeek().size() == 1) {
@@ -312,7 +321,7 @@ public class FrequencyStatistics {
                 XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "异常率"), Constant.templatePath, outPath + "/" + this.getVIN() + "PWRate.docx");
             }
         } else if (this.getPressureDropConsistencyMapWeek().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum(), "异常率"), Constant.templatePath2, outPath + "/" + this.getVIN() + "PWRate.docx");
+            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, this.getBatteryNum()), Constant.templatePath2, outPath + "/" + this.getVIN() + "PWRate.docx");
         }
         /**
          * 每1500帧次数
@@ -322,24 +331,25 @@ public class FrequencyStatistics {
                 XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + "/" + this.getVIN() + "EENum.docx");
             }
         } else if (this.getEntropyMapNums().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getData(this.getEntropyMapNums(), this.getBatteryNum(), "次数"), Constant.templatePath2, outPath + "/" + this.getVIN() + "EENum.docx");
+            XDocUtil.outLine(XDocUtil.getData(this.getEntropyMapNums(), this.getBatteryNum()), Constant.templatePath2, outPath + "/" + this.getVIN() + "EENum.docx");
         }
         if (this.getVolatilityDetectionMapNums().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : this.getVolatilityDetectionMapNums().entrySet()) {
                 XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + "/" + this.getVIN() + "VENum.docx");
             }
         } else if (this.getVolatilityDetectionMapNums().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getData(this.getVolatilityDetectionMapNums(), this.getBatteryNum(), "次数"), Constant.templatePath2, outPath + "/" + this.getVIN() + "VENum.docx");
+            XDocUtil.outLine(XDocUtil.getData(this.getVolatilityDetectionMapNums(), this.getBatteryNum()), Constant.templatePath2, outPath + "/" + this.getVIN() + "VENum.docx");
         }
         if (this.getPressureDropConsistencyMapNums().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : this.getPressureDropConsistencyMapNums().entrySet()) {
                 XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + "/" + this.getVIN() + "PENum.docx");
             }
         } else if (this.getPressureDropConsistencyMapNums().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getData(this.getPressureDropConsistencyMapNums(), this.getBatteryNum(), "次数"), Constant.templatePath2, outPath + "/" + this.getVIN() + "PENum.docx");
+            XDocUtil.outLine(XDocUtil.getData(this.getPressureDropConsistencyMapNums(), this.getBatteryNum()), Constant.templatePath2, outPath + "/" + this.getVIN() + "PENum.docx");
         }
-        Merge2.merge(outPath, this.getVIN(),this);
+        Merge2.merge(outPath, this.getVIN(), this);
     }
+
     /**
      * 处理熵值故障诊断模型数据
      *
@@ -358,34 +368,38 @@ public class FrequencyStatistics {
             List<List<String>> lists = ReadToList(s);
             Map<Integer, Integer> tmpMap = new TreeMap<>(); //存放一天的数据
             for (List<String> list : lists) {
+                if(this.getBatteryNum()==0){
+                    /** 存放单体数量 */
+                    this.setBatteryNum(list.get(10).split("_").length);
+                }
                 if (new BigDecimal(list.get(9)).compareTo(new BigDecimal("4")) > 0) {
                     if (null == list.get(8)) continue;
-                        /**
-                         * 天数据
-                         */
-                        if (tmpMap.containsKey(Integer.parseInt(list.get(8)))) {
-                            tmpMap.put(Integer.parseInt(list.get(8)), tmpMap.get(Integer.parseInt(list.get(8))) + 1);
-                        } else {
-                            tmpMap.put(Integer.parseInt(list.get(8)), 1);
-                        }
-                        /**
-                         * 每1500条数据
-                         */
-                        if (numsMap.containsKey(Integer.parseInt(list.get(8)))) {
-                            numsMap.put(Integer.parseInt(list.get(8)), numsMap.get(Integer.parseInt(list.get(8))) + 1);
-                        } else {
-                            numsMap.put(Integer.parseInt(list.get(8)), 1);
-                        }
-                        nums++;
-                        /**
-                         * 每1500条数据
-                         */
-                        if (nums >= this.getEntropyNums()) {
-                            this.getEntropyMapNums().put(index * 1L, numsMap);
-                            numsMap = new TreeMap<>();
-                            nums = 0;
-                            index++;
-                        }
+                    /**
+                     * 天数据
+                     */
+                    if (tmpMap.containsKey(Integer.parseInt(list.get(8)))) {
+                        tmpMap.put(Integer.parseInt(list.get(8)), tmpMap.get(Integer.parseInt(list.get(8))) + 1);
+                    } else {
+                        tmpMap.put(Integer.parseInt(list.get(8)), 1);
+                    }
+                    /**
+                     * 每1500条数据
+                     */
+                    if (numsMap.containsKey(Integer.parseInt(list.get(8)))) {
+                        numsMap.put(Integer.parseInt(list.get(8)), numsMap.get(Integer.parseInt(list.get(8))) + 1);
+                    } else {
+                        numsMap.put(Integer.parseInt(list.get(8)), 1);
+                    }
+                    nums++;
+                    /**
+                     * 每1500条数据
+                     */
+                    if (nums >= this.getEntropyNums()) {
+                        this.getEntropyMapNums().put(index * 1L, numsMap);
+                        numsMap = new TreeMap<>();
+                        nums = 0;
+                        index++;
+                    }
                 }
             }
             /**

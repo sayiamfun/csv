@@ -1,6 +1,6 @@
 package com.sayiamfun.templatemethod.controller;
 
-import com.sayiamfun.common.ScanPackage;
+import com.sayiamfun.common.utils.ScanPackage;
 import com.sayiamfun.templatemethod.invoke.VolatilityConsistencyService;
 import com.sayiamfun.templatemethod.output.VolatilityConsistencyResult;
 import org.springframework.beans.factory.annotation.Autowired;

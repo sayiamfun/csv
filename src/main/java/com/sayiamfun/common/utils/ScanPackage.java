@@ -1,15 +1,13 @@
-package com.sayiamfun.common;
+package com.sayiamfun.common.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author liwenjie
@@ -21,18 +19,9 @@ public class ScanPackage {
     private static ArrayList<String> scanFiles = new ArrayList<>();
     private static int count = 0;
     //字符编码
+    public static final String GBK = "GBK";
     public final static String encode = "GBK";
     public final static String UTF_8 = "UTF-8";
-
-    public static void main(String[] args) throws Exception {
-        long currentTimeMillis = System.currentTimeMillis();
-        scanFilesWithRecursion("D:\\文档资料\\预警\\20191009112903");
-        System.out.println(scanFiles.size());
-        System.out.println(count);
-        long currentTimeMillis2 = System.currentTimeMillis();
-        System.out.println(currentTimeMillis2 - currentTimeMillis);
-
-    }
 
     /**
      * 从excel获取文件
@@ -224,7 +213,7 @@ public class ScanPackage {
                         scanFilesWithRecursion(filelist[i].getAbsolutePath());
                     }
                     /**非文件夹**/
-                    else if(filelist[i].getAbsolutePath().contains(".csv") && (filelist[i].getAbsolutePath().contains("熵值故障诊断模型") || filelist[i].getAbsolutePath().contains("波动一致性故障诊断模型") || filelist[i].getAbsolutePath().contains("压降一致性故障诊断模型"))){
+                    else if (filelist[i].getAbsolutePath().contains(".csv") && (filelist[i].getAbsolutePath().contains("熵值故障诊断模型") || filelist[i].getAbsolutePath().contains("波动一致性故障诊断模型") || filelist[i].getAbsolutePath().contains("压降一致性故障诊断模型"))) {
                         if (!scanFiles.contains(filelist[i].getAbsolutePath())) {
                             scanFiles.add(filelist[i].getAbsolutePath());
                         }
@@ -235,5 +224,51 @@ public class ScanPackage {
             e.printStackTrace();
         }
         return scanFiles;
+    }
+
+    public static ArrayList<String> scanFiles(String folderPath) {
+        ArrayList<String> scanFiles = new ArrayList<>();
+        try {
+            File directory = new File(folderPath);
+            if (!directory.isDirectory()) {
+                throw new FileNotFoundException('"' + folderPath + '"' + " input path is not a Directory , please input the right path of the Directory. ^_^...^_^");
+            }
+            if (directory.isDirectory()) {
+                File[] filelist = directory.listFiles();
+                for (int i = 0; i < filelist.length; i++) {
+                    /**如果当前是文件夹，进入递归扫描文件夹**/
+                    if (filelist[i].isDirectory()) {
+                        /**递归扫描下面的文件夹**/
+                        ArrayList<String> strings = scanFiles(filelist[i].getAbsolutePath());
+                        for (String string : strings) {
+                            if (!scanFiles.contains(string)) {
+                                scanFiles.add(string);
+                            }
+                        }
+                    }
+                    /**非文件夹**/
+                    else {
+                        if (!scanFiles.contains(filelist[i].getAbsolutePath())) {
+                            scanFiles.add(filelist[i].getAbsolutePath());
+                        }
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return scanFiles;
+    }
+
+    public static Map<String, ArrayList<String>> fileMap = new HashMap<>();
+
+
+    public static void main(String[] args) {
+        try {
+            String m = null;
+            m.length();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

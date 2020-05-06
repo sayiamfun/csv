@@ -1,12 +1,10 @@
 package com.sayiamfun.LHB15T3E0JG404306.controller;
 
-import com.sayiamfun.common.Echars;
+import com.sayiamfun.common.utils.Echars;
 import com.sayiamfun.csv.word.ExportUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
