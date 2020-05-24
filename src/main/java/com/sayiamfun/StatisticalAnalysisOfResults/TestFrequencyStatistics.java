@@ -2,6 +2,7 @@ package com.sayiamfun.StatisticalAnalysisOfResults;
 
 import com.sayiamfun.common.utils.ScanPackage;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -11,14 +12,16 @@ import java.util.*;
 public class TestFrequencyStatistics {
 
 
-    static String inpath = "C:\\Users\\liwenjie\\Downloads\\20200323091631\\";
+    static String inpath = "D:\\车辆数据\\吉利\\20200515112232\\";
     static String outPath = inpath + "out/";
-
     public static void main(String[] args) {
         test();
     }
 
     private static void test() {
+        if(!new File(outPath).exists()){
+            new File(outPath).mkdir();
+        }
         Map<String, FrequencyStatistics> map = new HashMap<>();
         //读取所有的文件路径
         ArrayList<String> strings = ScanPackage.scanFilesWithRecursion(inpath);

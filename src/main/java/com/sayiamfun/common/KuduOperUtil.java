@@ -20,7 +20,7 @@ public class KuduOperUtil {
 	static String masterList ;
 
 	public void setMasterList(String masterList) {
-		KuduOperUtil.masterList = "10.10.11.188:17051,10.10.11.189:17051,10.10.11.190:17051";
+		KuduOperUtil.masterList = "10.11.3.18:7051,10.11.3.19:7051";
 	}
 
 	{
