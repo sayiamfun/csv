@@ -2,20 +2,18 @@ package com.sayiamfun.file20200420;
 
 import com.sayiamfun.StatisticalAnalysisOfResults.FrequencyStatistics;
 import com.sayiamfun.common.utils.ScanPackage;
-import org.codehaus.jackson.JsonEncoding;
-import org.codehaus.jackson.map.util.JSONPObject;
 
 import java.io.*;
 import java.math.BigDecimal;
 import java.util.*;
 
-public class Main {
+public class MainLine {
 
     public static void main(String[] args) {
 
         Map<String, FrequencyStatistics> map = new HashMap<>();
-        //读取所有的文件路径
-        ArrayList<String> strings = ScanPackage.scanFilesWithRecursion("D:\\车辆数据\\其他车辆数据\\20200420\\结果");
+        //读取所有的文件路径`
+        ArrayList<String> strings = ScanPackage.scanFilesWithRecursion("D:\\车辆数据\\北汽数据\\所有");
         Collections.sort(strings, new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
@@ -55,15 +53,20 @@ public class Main {
         //csv文件读取方法
         InputStreamReader ir = null;
         BufferedReader reader = null;
-
-        for (String path : map.get("LVCB4L4D7KM001717").getEntropyList()) {
+        int loading = 0;
+        System.out.print("解析中");
+        for (String path : map.get("LNBSCC4H8JD051115").getEntropyList()) {
+            loading++;
+            if (loading % 1000 == 0) {
+                System.out.print(" . ");
+            }
             try {
                 ir = new InputStreamReader(new FileInputStream(new File(path)), ScanPackage.encode);
                 reader = new BufferedReader(ir);//到读取的文件
                 String line = reader.readLine();
                 while ((line = reader.readLine()) != null) {
                     String item[] = line.split(",");//CSV格式文件为逗号分隔符文件，这里根据逗号切分
-                    if (new BigDecimal(item[2]).compareTo(new BigDecimal("20190824000000")) < 0 && new BigDecimal(item[9]).compareTo(new BigDecimal("4"))>0) {
+                    if (new BigDecimal(item[2]).compareTo(new BigDecimal("20190301000000")) >= 0 && new BigDecimal(item[2]).compareTo(new BigDecimal("20190401000000")) < 0 && new BigDecimal(item[9]).compareTo(new BigDecimal("4")) > 0) {
                         tmpMap = new HashMap<>();
                         tmpMap.put("octime", item[2]);
                         tmpMap.put("stringvars", item[10]);
@@ -102,9 +105,7 @@ public class Main {
         }
 
         LinkedList<Integer> nameList = new LinkedList<>();
-        for (
-                int i = 0;
-                i < nums; i++) {
+        for (int i = 0; i < nums; i++) {
             nameList.add(i + 1);
         }
         System.out.println("{");
