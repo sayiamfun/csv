@@ -1,7 +1,10 @@
 package com.sayiamfun.StatisticalAnalysisOfResults;
 
 import com.sayiamfun.common.Constant;
-import com.spire.doc.*;
+import com.spire.doc.Document;
+import com.spire.doc.DocumentObject;
+import com.spire.doc.FileFormat;
+import com.spire.doc.Section;
 
 import java.io.File;
 
@@ -10,7 +13,7 @@ import java.io.File;
  */
 public class Merge2 {
 
-    public static void merge(String outPath, String vin, FrequencyStatistics frequencyStatistics) {
+    public static void merge(String outPath, String vin, String type, FrequencyStatistics frequencyStatistics) {
         Document doc0 = null;
         Document doc1 = null;
         Document doc2 = null;
@@ -22,15 +25,15 @@ public class Merge2 {
         Document doc8 = null;
         Document doc9 = null;
         String file0 = Constant.templatePath3;
-        String fil1 = outPath + "/" + vin + "EARate.docx";
-        String fil2 = outPath + "/" + vin + "EENum.docx";
-        String fil3 = outPath + "/" + vin + "EWRate.docx";
-        String fil4 = outPath + "/" + vin + "PARate.docx";
-        String fil5 = outPath + "/" + vin + "PENum.docx";
-        String fil6 = outPath + "/" + vin + "PWRate.docx";
-        String fil7 = outPath + "/" + vin + "VARate.docx";
-        String fil8 = outPath + "/" + vin + "VENum.docx";
-        String fil9 = outPath + "/" + vin + "VWRate.docx";
+        String fil1 = outPath + "/" + vin + "_" + type + "EARate.docx";
+        String fil2 = outPath + "/" + vin + "_" + type + "EENum.docx";
+        String fil3 = outPath + "/" + vin + "_" + type + "EWRate.docx";
+        String fil4 = outPath + "/" + vin + "_" + type + "PARate.docx";
+        String fil5 = outPath + "/" + vin + "_" + type + "PENum.docx";
+        String fil6 = outPath + "/" + vin + "_" + type + "PWRate.docx";
+        String fil7 = outPath + "/" + vin + "_" + type + "VARate.docx";
+        String fil8 = outPath + "/" + vin + "_" + type + "VENum.docx";
+        String fil9 = outPath + "/" + vin + "_" + type + "VWRate.docx";
         //加载需要合并的两个文档
         //加载需要合并的两个文档
         doc0 = new Document(file0);
@@ -141,7 +144,7 @@ public class Merge2 {
                 doc0.replace(s1.trim(), "", false, true);
         }
         //保存合并后的文档
-        doc0.saveToFile(outPath + "/0_" + vin + "___统计图.docx", FileFormat.Docx_2010);
+        doc0.saveToFile(outPath + "/0_" + vin + "_" + type + "___统计图.docx", FileFormat.Docx_2010);
     }
 
 }

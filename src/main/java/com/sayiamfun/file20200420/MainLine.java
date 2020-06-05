@@ -13,7 +13,7 @@ public class MainLine {
 
         Map<String, FrequencyStatistics> map = new HashMap<>();
         //读取所有的文件路径`
-        ArrayList<String> strings = ScanPackage.scanFilesWithRecursion("D:\\车辆数据\\北汽数据\\所有");
+        ArrayList<String> strings = ScanPackage.scanFilesWithRecursion("D:\\车辆数据\\上汽\\tmpout\\LK6ADCE29HB016971\\20200603153153\\");
         Collections.sort(strings, new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
@@ -55,7 +55,12 @@ public class MainLine {
         BufferedReader reader = null;
         int loading = 0;
         System.out.print("解析中");
-        for (String path : map.get("LNBSCC4H8JD051115").getEntropyList()) {
+
+        String vin = "LK6ADCE29HB016971";
+        String startTime = "20200101000000";
+        String endTime = "20200201000000";
+
+        for (String path : map.get(vin).getEntropyList()) {
             loading++;
             if (loading % 1000 == 0) {
                 System.out.print(" . ");
@@ -66,7 +71,7 @@ public class MainLine {
                 String line = reader.readLine();
                 while ((line = reader.readLine()) != null) {
                     String item[] = line.split(",");//CSV格式文件为逗号分隔符文件，这里根据逗号切分
-                    if (new BigDecimal(item[2]).compareTo(new BigDecimal("20190301000000")) >= 0 && new BigDecimal(item[2]).compareTo(new BigDecimal("20190401000000")) < 0 && new BigDecimal(item[9]).compareTo(new BigDecimal("4")) > 0) {
+                    if (new BigDecimal(item[2]).compareTo(new BigDecimal(startTime)) >= 0 && new BigDecimal(item[2]).compareTo(new BigDecimal(endTime)) < 0 && new BigDecimal(item[9]).compareTo(new BigDecimal("4")) > 0) {
                         tmpMap = new HashMap<>();
                         tmpMap.put("octime", item[2]);
                         tmpMap.put("stringvars", item[10]);
@@ -121,11 +126,14 @@ public class MainLine {
         System.out.println("maxentropyName:" + resultMap.get("maxentropyName") + ",");
         System.out.println("numName:" + resultMap.get("numName") + ",");
         System.out.print("dataList:{");
-        for (
-                Map.Entry<String, Object> stringObjectEntry : maps.entrySet()) {
+        int num = 0;
+        for (Map.Entry<String, Object> stringObjectEntry : maps.entrySet()) {
+            num++;
             System.out.println(stringObjectEntry.getKey() + ":" + stringObjectEntry.getValue() + ",");
         }
         System.out.print("}");
         System.out.println("}");
+
+        System.out.println(num);
     }
 }

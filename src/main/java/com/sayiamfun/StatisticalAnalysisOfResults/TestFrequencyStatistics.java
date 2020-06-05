@@ -12,14 +12,15 @@ import java.util.*;
 public class TestFrequencyStatistics {
 
 
-    static String inpath = "D:\\车辆数据\\吉利\\20200515112232\\";
+    static String inpath = "D:\\车辆数据\\其他车辆数据\\20200418\\北京公交\\result\\zipout\\LVCB4L4D7KM001717\\20200605160834\\";
     static String outPath = inpath + "out/";
+
     public static void main(String[] args) {
         test();
     }
 
     private static void test() {
-        if(!new File(outPath).exists()){
+        if (!new File(outPath).exists()) {
             new File(outPath).mkdir();
         }
         Map<String, FrequencyStatistics> map = new HashMap<>();
@@ -58,16 +59,24 @@ public class TestFrequencyStatistics {
                 map.put(vin, frequencyStatistics);
             }
         }
+
+        Map<String, FrequencyStatistics> map2 = mapCopy(map);
+
         for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map.entrySet()) {
+            stringFrequencyStatisticsEntry.getValue().setType("2");
             //开始处理压降一致性数据   因为需要获取单体数量
             System.out.println("开始处理压降一致性文件");
-            stringFrequencyStatisticsEntry.getValue().doPressureDropConsistency();
+            stringFrequencyStatisticsEntry.getValue().doPressureDropConsistencyDayAndNums();
+            stringFrequencyStatisticsEntry.getValue().doPressureDropConsistencyWeek();
             System.out.println("开始处理波动一致性文件");
-            stringFrequencyStatisticsEntry.getValue().doVolatilityDetection();
+            stringFrequencyStatisticsEntry.getValue().doVolatilityDetectionDayAndNums();
+            stringFrequencyStatisticsEntry.getValue().doVolatilityDetectionWeek();
             System.out.println("开始处理熵值一致性文件");
-            stringFrequencyStatisticsEntry.getValue().doEntropy();
+            stringFrequencyStatisticsEntry.getValue().doEntropyDayAndNums();
+            stringFrequencyStatisticsEntry.getValue().doEntropyWeek();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
             stringFrequencyStatisticsEntry.getValue().setNowTime(formatter.format(new Date()));   //设置统一输出时间
+
             System.out.println("开始输出压降一致性结果");
             stringFrequencyStatisticsEntry.getValue().outPressureDropConsistency(outPath);
             System.out.println("开始输出波动一致性结果");
@@ -76,7 +85,39 @@ public class TestFrequencyStatistics {
             stringFrequencyStatisticsEntry.getValue().outEntropy(outPath);
             stringFrequencyStatisticsEntry.getValue().outIcon(outPath);
         }
+
+        for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map2.entrySet()) {
+            stringFrequencyStatisticsEntry.getValue().setType("1");
+            //开始处理压降一致性数据   因为需要获取单体数量
+            System.out.println("开始处理压降一致性文件");
+            stringFrequencyStatisticsEntry.getValue().doPressureDropConsistencyDayAndNums();
+            stringFrequencyStatisticsEntry.getValue().doPressureDropConsistencyWeek();
+            System.out.println("开始处理波动一致性文件");
+            stringFrequencyStatisticsEntry.getValue().doVolatilityDetectionDayAndNums();
+            stringFrequencyStatisticsEntry.getValue().doVolatilityDetectionWeek();
+            System.out.println("开始处理熵值一致性文件");
+            stringFrequencyStatisticsEntry.getValue().doEntropyDayAndNums();
+            stringFrequencyStatisticsEntry.getValue().doEntropyWeek();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            stringFrequencyStatisticsEntry.getValue().setNowTime(formatter.format(new Date()));   //设置统一输出时间
+
+            System.out.println("开始输出压降一致性结果");
+//            stringFrequencyStatisticsEntry.getValue().outPressureDropConsistency(outPath);
+            System.out.println("开始输出波动一致性结果");
+            stringFrequencyStatisticsEntry.getValue().outVolatilityDetection(outPath);
+            System.out.println("开始输出熵值结果");
+//            stringFrequencyStatisticsEntry.getValue().outEntropy(outPath);
+//            stringFrequencyStatisticsEntry.getValue().outIcon(outPath);
+        }
         System.out.println("-----------------------结束-------------------------------");
+    }
+
+    public static Map<String,FrequencyStatistics> mapCopy(Map<String,FrequencyStatistics> map){
+        Map<String,FrequencyStatistics> resultMap = new HashMap<>();
+        for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map.entrySet()) {
+            resultMap.put(stringFrequencyStatisticsEntry.getKey(),new FrequencyStatistics(stringFrequencyStatisticsEntry.getValue()));
+        }
+        return resultMap;
     }
 
 }
