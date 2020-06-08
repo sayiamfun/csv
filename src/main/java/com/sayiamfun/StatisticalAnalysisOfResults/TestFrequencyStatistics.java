@@ -12,7 +12,7 @@ import java.util.*;
 public class TestFrequencyStatistics {
 
 
-    static String inpath = "D:\\车辆数据\\其他车辆数据\\20200418\\北京公交\\result\\zipout\\LVCB4L4D7KM001717\\20200605160834\\";
+    static String inpath = "D:\\车辆数据\\其他车辆数据\\20200418\\北京公交\\result\\out\\20200608171807\\";
     static String outPath = inpath + "out/";
 
     public static void main(String[] args) {
@@ -83,7 +83,7 @@ public class TestFrequencyStatistics {
             stringFrequencyStatisticsEntry.getValue().outVolatilityDetection(outPath);
             System.out.println("开始输出熵值结果");
             stringFrequencyStatisticsEntry.getValue().outEntropy(outPath);
-            stringFrequencyStatisticsEntry.getValue().outIcon(outPath);
+//            stringFrequencyStatisticsEntry.getValue().outIcon(outPath);
         }
 
         for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map2.entrySet()) {
@@ -102,11 +102,11 @@ public class TestFrequencyStatistics {
             stringFrequencyStatisticsEntry.getValue().setNowTime(formatter.format(new Date()));   //设置统一输出时间
 
             System.out.println("开始输出压降一致性结果");
-//            stringFrequencyStatisticsEntry.getValue().outPressureDropConsistency(outPath);
+            stringFrequencyStatisticsEntry.getValue().outPressureDropConsistency(outPath);
             System.out.println("开始输出波动一致性结果");
             stringFrequencyStatisticsEntry.getValue().outVolatilityDetection(outPath);
             System.out.println("开始输出熵值结果");
-//            stringFrequencyStatisticsEntry.getValue().outEntropy(outPath);
+            stringFrequencyStatisticsEntry.getValue().outEntropy(outPath);
 //            stringFrequencyStatisticsEntry.getValue().outIcon(outPath);
         }
         System.out.println("-----------------------结束-------------------------------");
