@@ -11,6 +11,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -48,31 +49,40 @@ public class FrequencyStatistics {
     private Integer volatilityDetectionSum = 0; //波动总次数
     private Integer EntropySum = 0; //熵值总次数
     private Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapDay = new TreeMap<>();//压降每天结果
-    private Map<Integer, Map<Long, Integer>> pressureDropConsistencyMapDayW = new TreeMap<>();//压降W
+    private Map<Integer, Map<Long, Integer>> pressureDropConsistencyMapDayW = new TreeMap<>();//压降天W
+    private Map<Integer, Map<Long, Integer>> pressureDropConsistencyMapNumsW = new TreeMap<>();//压降1500帧W
     private Map<Long, Map<Integer, Double>> pressureDropConsistencyMapDayZSum = new TreeMap<>();//压降每天压差比的和Z
     private Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapWeek = new TreeMap<>();//压降每周结果
     private Map<Long, Integer> pressureDropConsistencyMapWeekSum = new TreeMap<>();//压降每周总和
+    private Map<Long, Integer> pressureDropConsistencyMapNumsSum = new TreeMap<>();//压降每1500帧总和
     private Map<Long, Map<Integer, Double>> pressureDropConsistencyMapWeekZSum = new TreeMap<>();//压降每周压差比的和Z
+    private Map<Long, Map<Integer, Double>> pressureDropConsistencyMapNumsZSum = new TreeMap<>();//压降每1500帧压差比的和Z
     private Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapNums = new TreeMap<>();//压降每1500条
     private Map<String, Map<Integer, Integer>> pressureDropConsistencyMapType = new LinkedHashMap<>();//压降充电段
     private Map<Integer, Integer> pressureDropConsistencyMapBatterSum = new TreeMap<>();//压降每个单体出现总次数
 
     private Map<Long, Map<Integer, Integer>> volatilityDetectionMapDay = new TreeMap<>();//波动每天
     private Map<Integer, Map<Long, Integer>> volatilityDetectionMapDayW = new TreeMap<>();//波动W
+    private Map<Integer, Map<Long, Integer>> volatilityDetectionMapNumsW = new TreeMap<>();//波动1500帧W
     private Map<Long, Map<Integer, Double>> volatilityDetectionMapDayVSum = new TreeMap<>();//波动每天倍数差的和Z
     private Map<Long, Map<Integer, Integer>> volatilityDetectionMapWeek = new TreeMap<>();//波动每周
     private Map<Long, Integer> volatilityDetectionMapWeekSum = new TreeMap<>();//波动每周总和
-    private Map<Long, Map<Integer, Double>> volatilityDetectionMapWeekVSum = new TreeMap<>();//波动每周倍数差的和Z
+    private Map<Long, Integer> volatilityDetectionMapNumsSum = new TreeMap<>();//波动每1500帧总和
+    private Map<Long, Map<Integer, Double>> volatilityDetectionMapWeekZSum = new TreeMap<>();//波动每周倍数差的和Z
+    private Map<Long, Map<Integer, Double>> volatilityDetectionMapNumsZSum = new TreeMap<>();//波动每1500帧倍数差的和Z
     private Map<Long, Map<Integer, Integer>> volatilityDetectionMapNums = new TreeMap<>();//波动每1500条
     private Map<String, Map<Integer, Integer>> volatilityDetectionMapType = new LinkedHashMap<>();//波动充电段
     private Map<Integer, Integer> volatilityDetectionMapBatterSum = new TreeMap<>();//波动每个单体出现总次数
 
     private Map<Long, Map<Integer, Integer>> EntropyMapDay = new TreeMap<>();//熵值每天
     private Map<Integer, Map<Long, Integer>> EntropyMapDayW = new TreeMap<>();//熵值W
+    private Map<Integer, Map<Long, Integer>> EntropyMapNumsW = new TreeMap<>();//熵值1500帧W
     private Map<Long, Map<Integer, Double>> EntropyMapDayXiShuSum = new TreeMap<>();//熵值每天系数差的和Z
+    private Map<Long, Map<Integer, Double>> EntropyMapNumsXiShuSum = new TreeMap<>();//熵值每1500系数差的和Z
     private Map<Long, Map<Integer, Integer>> EntropyMapWeek = new TreeMap<>();//熵值每周
     private Map<Long, Map<Integer, Double>> EntropyMapWeekXiShuSum = new TreeMap<>();//熵值每周系数差总和Z
     private Map<Long, Integer> EntropyMapWeekSum = new TreeMap<>();//熵值每周总和
+    private Map<Long, Integer> EntropyMapNumsSum = new TreeMap<>();//熵值每1500帧总和
     private Map<Long, Map<Integer, Integer>> EntropyMapNums = new TreeMap<>();//熵值每1500条
     private Map<String, Map<Integer, Integer>> EntropyMapType = new LinkedHashMap<>();//熵值充电段
     private Map<Integer, Integer> EntropyMapBatterSum = new TreeMap<>();//熵值每个单体出现总次数
@@ -119,8 +129,9 @@ public class FrequencyStatistics {
     public void doVolatilityDetectionDayAndNums() {
         int nums = 0;
         int numsindex = 1;
-        Map<Integer, Integer> numsMap = new TreeMap<>(); //存放每1500条的数据
-        Map<Integer, Integer> typeMap = new TreeMap<>(); //存放分段数据
+        Map<Integer, Integer> numsMap = new TreeMap<>(); //存放每1500条的数据 单体频次
+        Map<Integer, Integer> typeMap = new TreeMap<>(); //存放分段数据 单体频次
+        Map<Integer, Double> numsSumpMap = new TreeMap<>();//存放每1500条的数据 倍数差的和
 
         Long lastTime = 0L;
         Long lastStartTime = 0L;
@@ -137,6 +148,7 @@ public class FrequencyStatistics {
             if (null == tmpMap) tmpMap = new TreeMap<>(); //存放一天的数据
             Map<Integer, Double> tmpSumMap = getVolatilityDetectionMapDayVSum().get(dataTime);
             if (null == tmpSumMap) tmpSumMap = new TreeMap<>();
+
             for (List<String> list : lists) {
                 if (!getType().equals(list.get(7))) continue;
                 if (null != list.get(6)) {
@@ -152,7 +164,7 @@ public class FrequencyStatistics {
                             tmpMap.put(monNum, 1);
                         }
                         /**
-                         * 每天波动倍数差的和
+                         * 波动倍数差的和
                          */
                         String quaList = list.get(13);
                         String[] s4 = quaList.split("_");
@@ -162,10 +174,21 @@ public class FrequencyStatistics {
                                 Integer smon = Integer.parseInt(split[0]);
                                 String sv = split[1];
                                 Double multiply = new BigDecimal(sv).subtract(new BigDecimal("3")).doubleValue();
+                                /**
+                                 * 每天波动倍数差的和
+                                 */
                                 if (tmpSumMap.containsKey(smon)) {
                                     tmpSumMap.put(smon, tmpSumMap.get(smon) + multiply);
                                 } else {
                                     tmpSumMap.put(smon, multiply);
+                                }
+                                /**
+                                 * 每1500帧波动倍数差的和
+                                 */
+                                if (numsSumpMap.containsKey(smon)) {
+                                    numsSumpMap.put(smon, numsSumpMap.get(smon) + multiply);
+                                } else {
+                                    numsSumpMap.put(smon, multiply);
                                 }
                             }
                         }
@@ -216,6 +239,10 @@ public class FrequencyStatistics {
                 if (nums >= getVolatilityNums()) {
                     getVolatilityDetectionMapNums().put(numsindex * 1L, numsMap);
                     numsMap = new TreeMap<>();
+
+                    getVolatilityDetectionMapNumsZSum().put(numsindex * 1L, numsSumpMap);
+                    numsSumpMap = new TreeMap<>();
+
                     nums = 0;
                     numsindex++;
                 }
@@ -236,6 +263,7 @@ public class FrequencyStatistics {
         }
         if (nums > 0) {
             getVolatilityDetectionMapNums().put(numsindex * 1L, numsMap);
+            getVolatilityDetectionMapNumsZSum().put(numsindex * 1L, numsSumpMap);
         }
     }
 
@@ -281,35 +309,16 @@ public class FrequencyStatistics {
             }
 
         }
-        //处理存放每周的数据(波动倍数差的和)
-        if (null != getVolatilityDetectionMapDayVSum() && getVolatilityDetectionMapDayVSum().size() > 0) {
-            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : getVolatilityDetectionMapDayVSum().entrySet()) {
-                if (getVzstartTime() == null) setVzstartTime(longMapEntry.getKey());
-                Long startTime = getWeekLastTime(getVzstartTime());//
-                while (longMapEntry.getKey() > startTime) {
-                    //如果当前时间小于startTime则为当前周的数据 否则则是新一周的数据  需要更新main.srartTime 并且添加新的数据到Mapweek
-                    setVzstartTime(longMapEntry.getKey());
-                    startTime = getWeekLastTime(getVzstartTime());
-                }
-                Map<Integer, Double> tmpMapWeek = getVolatilityDetectionMapWeekVSum().get(getVzstartTime());
-                if (null == tmpMapWeek) {
-                    tmpMapWeek = new TreeMap<>(); //存放一周的数据
-                }
-                for (Map.Entry<Integer, Double> integerIntegerEntry : longMapEntry.getValue().entrySet()) {
-                    Integer monNum = integerIntegerEntry.getKey();
-                    Double nums = integerIntegerEntry.getValue();
-                    if (tmpMapWeek.containsKey(monNum)) {
-                        tmpMapWeek.put(monNum, tmpMapWeek.get(monNum) + nums);
-                    } else {
-                        tmpMapWeek.put(monNum, nums);
-                    }
-                }
-                getVolatilityDetectionMapWeekVSum().put(getVzstartTime(), tmpMapWeek);
-            }
-        }
 
+        //处理存放每周的数据(波动倍数差的和)
+
+        doZ(getVolatilityDetectionMapDayVSum(), 2);
         doW(getVolatilityDetectionMapDay(), 2);
         doXY(getVolatilityDetectionMapWeek(), 2);
+
+        doZNums(getVolatilityDetectionMapNumsZSum(), 2);
+        doWNums(getVolatilityDetectionMapNums(), 2);
+        doXYNums(getVolatilityDetectionMapNums(), 2);
     }
 
     /**
@@ -320,9 +329,12 @@ public class FrequencyStatistics {
      */
     public void doPressureDropConsistencyDayAndNums() {
         int nums = 0;
+        int znums = 0;
         int numsindex = 1;
-        Map<Integer, Integer> numsMap = new TreeMap<>(); //存放每1500条的数据
-        Map<Integer, Integer> typeMap = new TreeMap<>(); //存放分段数据
+        int znumsindex = 1;
+        Map<Integer, Integer> numsMap = new TreeMap<>(); //存放每1500条的数据 单体频次
+        Map<Integer, Integer> typeMap = new TreeMap<>(); //存放分段数据 单体频次
+        Map<Integer, Double> numsSumMap = new TreeMap<>(); //存放分段数据 压差倍数的差值
 
         Long lastTime = 0L;
         Long lastStartTime = 0L;
@@ -344,14 +356,35 @@ public class FrequencyStatistics {
             while (iterator.hasNext()) {
                 List<String> next = iterator.next();
                 /**
-                 * 每天
+                 * 压差倍数差的和
                  */
                 if (StringUtils.isNotEmpty(next.get(14)) && new BigDecimal(next.get(14)).compareTo(new BigDecimal("2")) > 0) {
                     double v = new BigDecimal(next.get(14)).subtract(new BigDecimal("2")).doubleValue();
+                    /**
+                     * 每天
+                     */
                     if (tmpSumMap.containsKey(1)) {
                         tmpSumMap.put(1, tmpSumMap.get(1) + v);
                     } else {
                         tmpSumMap.put(1, v);
+                    }
+                    /**
+                     * 每1500帧
+                     */
+                    if (numsSumMap.containsKey(1)) {
+                        numsSumMap.put(1, numsSumMap.get(1) + v);
+                    } else {
+                        numsSumMap.put(1, v);
+                    }
+                    znums++;
+                    /**
+                     * 每1500条数据放入
+                     */
+                    if (znums >= getPressureNums()) {
+                        getPressureDropConsistencyMapNumsZSum().put(znumsindex * 1L, numsSumMap);
+                        numsMap = new TreeMap<>();
+                        znums = 0;
+                        znumsindex++;
                     }
                 }
                 //获取电池单体数量
@@ -466,6 +499,9 @@ public class FrequencyStatistics {
         if (nums > 0) {
             getPressureDropConsistencyMapNums().put(numsindex * 1L, numsMap);
         }
+        if (znums > 0) {
+            getPressureDropConsistencyMapNumsZSum().put(znumsindex * 1L, numsSumMap);
+        }
     }
 
     /**
@@ -508,109 +544,14 @@ public class FrequencyStatistics {
             }
         }
         //处理存放每周的数据(最大压差最小压差比的和)
-        if (null != getPressureDropConsistencyMapDayZSum() && getPressureDropConsistencyMapDayZSum().size() > 0) {
-            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : getPressureDropConsistencyMapDayZSum().entrySet()) {
-                if (getPzstartTime() == null) setPzstartTime(longMapEntry.getKey());
-                Long startTime = getWeekLastTime(getPzstartTime());//
-                while (longMapEntry.getKey() > startTime) {
-                    //如果当前时间小于startTime则为当前周的数据 否则则是新一周的数据  需要更新main.srartTime 并且添加新的数据到Mapweek
-                    setPzstartTime(longMapEntry.getKey());
-                    startTime = getWeekLastTime(getPzstartTime());
-                }
-                Map<Integer, Double> tmpMapWeek = getPressureDropConsistencyMapWeekZSum().get(getPzstartTime());
-                if (null == tmpMapWeek) {
-                    tmpMapWeek = new TreeMap<>(); //存放一周的数据
-                }
-                for (Map.Entry<Integer, Double> integerIntegerEntry : longMapEntry.getValue().entrySet()) {
-                    Integer monNum = integerIntegerEntry.getKey();
-                    Double nums = integerIntegerEntry.getValue();
-                    if (tmpMapWeek.containsKey(monNum)) {
-                        tmpMapWeek.put(monNum, tmpMapWeek.get(monNum) + nums);
-                    } else {
-                        tmpMapWeek.put(monNum, nums);
-                    }
-                }
-                getPressureDropConsistencyMapWeekZSum().put(getPzstartTime(), tmpMapWeek);
-            }
-        }
+        doZ(getPressureDropConsistencyMapDayZSum(), 3);
         doW(getPressureDropConsistencyMapDay(), 3);
         doXY(getPressureDropConsistencyMapWeek(), 3);
+
+        doZNums(getPressureDropConsistencyMapNumsZSum(), 3);
+        doWNums(getPressureDropConsistencyMapNums(), 3);
+        doXYNums(getPressureDropConsistencyMapNums(), 3);
     }
-
-    /**
-     * 求 W
-     *
-     * @param mapDay
-     * @param type   1 熵值 2 波动 3 压降
-     * @return java.util.Map<java.lang.Long, java.lang.Integer>
-     * @author liwenjie
-     * @date 2020/6/5 13:59
-     */
-    public void doW(Map<Long, Map<Integer, Integer>> mapDay, int type) {
-        Map<Integer, Map<Long, Integer>> dayNumMap = new TreeMap<>();
-        if (null != mapDay && mapDay.size() > 0) {
-            Set<Long> longs = mapDay.keySet();
-            for (int i = 0; i < getBatteryNum(); i++) {
-                Map<Long, Integer> longIntegerMap = new TreeMap<>();
-                for (Long aLong : longs) {
-                    longIntegerMap.put(aLong, getIntegerNum(mapDay.get(aLong).get(i + 1)));
-                }
-                dayNumMap.put(i + 1, longIntegerMap);
-            }
-        }
-        Map<Integer, Map<Long, Integer>> resultDayNumMap = new TreeMap<>();
-        for (Map.Entry<Integer, Map<Long, Integer>> integerMapEntry : dayNumMap.entrySet()) {
-            Integer key = integerMapEntry.getKey();
-            Map<Long, Integer> value = integerMapEntry.getValue();
-            int last = 0;
-            Map<Long, Integer> longIntegerMap = new TreeMap<>();
-            for (Map.Entry<Long, Integer> longIntegerEntry : value.entrySet()) {
-                longIntegerMap.put(longIntegerEntry.getKey(), longIntegerEntry.getValue() - last);
-                last = longIntegerEntry.getValue();
-            }
-            resultDayNumMap.put(key, longIntegerMap);
-        }
-        if (1 == type) {
-            setEntropyMapDayW(resultDayNumMap);
-        } else if (2 == type) {
-            setVolatilityDetectionMapDayW(resultDayNumMap);
-        } else if (3 == type) {
-            setPressureDropConsistencyMapDayW(resultDayNumMap);
-        }
-    }
-
-    /**
-     * 求 X Y
-     *
-     * @param weekDay
-     * @param
-     * @return java.util.Map<java.lang.Long, java.lang.Integer>
-     * @author liwenjie
-     * @date 2020/6/5 13:59
-     */
-    public void doXY(Map<Long, Map<Integer, Integer>> weekDay, int type) {
-        Map<Long, Integer> mapWeekSum = new TreeMap<>();
-        if (null != weekDay && weekDay.size() > 0) {
-
-            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : weekDay.entrySet()) {
-                Integer weekSum = mapWeekSum.get(longMapEntry.getKey());
-                Map<Integer, Integer> dayValue = longMapEntry.getValue();
-                if (null == weekSum) weekSum = 0;
-                for (Map.Entry<Integer, Integer> integerIntegerEntry : dayValue.entrySet()) {
-                    weekSum += integerIntegerEntry.getValue();
-                }
-                mapWeekSum.put(longMapEntry.getKey(), weekSum);
-            }
-        }
-        if (1 == type) {
-            setEntropyMapWeekSum(mapWeekSum);
-        } else if (2 == type) {
-            setVolatilityDetectionMapWeekSum(mapWeekSum);
-        } else if (3 == type) {
-            setPressureDropConsistencyMapWeekSum(mapWeekSum);
-        }
-    }
-
 
     /**
      * 处理熵值故障诊断模型数据
@@ -621,8 +562,9 @@ public class FrequencyStatistics {
     public void doEntropyDayAndNums() {
         int nums = 0;
         int index = 1;
-        Map<Integer, Integer> numsMap = new TreeMap<>(); //存放每1500条的数据
-        Map<Integer, Integer> typeMap = new TreeMap<>(); //存放分段数据
+        Map<Integer, Integer> numsMap = new TreeMap<>(); //存放每1500条的数据 单体频次
+        Map<Integer, Integer> typeMap = new TreeMap<>(); //存放分段数据 单体频次
+        Map<Integer, Double> numsSumMap = new TreeMap<>(); //存放分段数据 系数差的和
 
         Long lastTime = 0L;
         Long lastStartTime = 0L;
@@ -664,6 +606,14 @@ public class FrequencyStatistics {
                     } else {
                         tmpSumMap.put(monNum, v);
                     }
+                    /***
+                     * 1500帧系数差的和
+                     */
+                    if (numsSumMap.containsKey(monNum)) {
+                        numsSumMap.put(monNum, numsSumMap.get(monNum) + v);
+                    } else {
+                        numsSumMap.put(monNum, v);
+                    }
                     /**
                      * 每1500条数据
                      */
@@ -679,6 +629,8 @@ public class FrequencyStatistics {
                     if (nums >= getEntropyNums()) {
                         getEntropyMapNums().put(index * 1L, numsMap);
                         numsMap = new TreeMap<>();
+                        getEntropyMapNumsXiShuSum().put(index * 1L, numsSumMap);
+                        numsSumMap = new TreeMap<>();
                         nums = 0;
                         index++;
                     }
@@ -734,6 +686,7 @@ public class FrequencyStatistics {
          */
         if (nums > 0) {
             getEntropyMapNums().put(index * 1L, numsMap);
+            getEntropyMapNumsXiShuSum().put(index * 1L, numsSumMap);
         }
     }
 
@@ -777,35 +730,291 @@ public class FrequencyStatistics {
                 getEntropyMapWeek().put(getEstartTime(), tmpMapWeek);
             }
         }
-        //处理存放每周的数据(系数差的和)
-        if (null != getEntropyMapDayXiShuSum() && getEntropyMapDayXiShuSum().size() > 0) {
-            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : getEntropyMapDayXiShuSum().entrySet()) {
-                if (getEzstartTime() == null) setEzstartTime(longMapEntry.getKey());
-                Long startTime = getWeekLastTime(getEzstartTime());//
-                while (longMapEntry.getKey() > startTime) {
-                    //如果当前时间小于startTime则为当前周的数据 否则则是新一周的数据  需要更新main.srartTime 并且添加新的数据到Mapweek
-                    setEzstartTime(longMapEntry.getKey());
-                    startTime = getWeekLastTime(getEzstartTime());
-                }
-                Map<Integer, Double> tmpMapWeek = getEntropyMapWeekXiShuSum().get(getEzstartTime());
-                if (null == tmpMapWeek) {
-                    tmpMapWeek = new TreeMap<>(); //存放一周的数据
-                }
-                for (Map.Entry<Integer, Double> integerIntegerEntry : longMapEntry.getValue().entrySet()) {
-                    Integer monNum = integerIntegerEntry.getKey();
-                    Double nums = integerIntegerEntry.getValue();
-                    if (tmpMapWeek.containsKey(monNum)) {
-                        tmpMapWeek.put(monNum, tmpMapWeek.get(monNum) + nums);
-                    } else {
-                        tmpMapWeek.put(monNum, nums);
-                    }
-                }
-                getEntropyMapWeekXiShuSum().put(getEzstartTime(), tmpMapWeek);
-            }
-        }
+        //处理存放每1500帧的数据(系数差的和)
+        doZ(getEntropyMapDayXiShuSum(), 1);
         doW(getEntropyMapDay(), 1);
         doXY(getEntropyMapWeek(), 1);
+
+        doZNums(getEntropyMapNumsXiShuSum(), 1);
+        doWNums(getEntropyMapNums(), 1);
+        doXYNums(getEntropyMapNums(), 1);
     }
+
+    private void doZNums(Map<Long, Map<Integer, Double>> zSum, int type) {
+        if (null != zSum && zSum.size() > 0) {
+
+            if (1 == type) {
+                Map<Integer, Double> tmpMap = null;
+                for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : zSum.entrySet()) {
+                    Map<Integer, Double> value = longMapEntry.getValue();
+                    Double sum = 0.0;
+                    for (Map.Entry<Integer, Double> integerDoubleEntry : value.entrySet()) {
+                        sum += integerDoubleEntry.getValue();
+                    }
+                    tmpMap = new TreeMap<>();
+                    tmpMap.put(1, sum);
+                    getEntropyMapNumsXiShuSum().put(longMapEntry.getKey(), tmpMap);
+                }
+            } else if (2 == type) {
+                Map<Integer, Double> tmpMap = null;
+                for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : zSum.entrySet()) {
+                    Map<Integer, Double> value = longMapEntry.getValue();
+                    Double sum = 0.0;
+                    for (Map.Entry<Integer, Double> integerDoubleEntry : value.entrySet()) {
+                        sum += integerDoubleEntry.getValue();
+                    }
+                    tmpMap = new TreeMap<>();
+                    tmpMap.put(1, sum);
+                    getVolatilityDetectionMapNumsZSum().put(longMapEntry.getKey(), tmpMap);
+                }
+            } else if (3 == type) {
+                Map<Integer, Double> tmpMap = null;
+                for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : zSum.entrySet()) {
+                    Map<Integer, Double> value = longMapEntry.getValue();
+                    Double sum = 0.0;
+                    for (Map.Entry<Integer, Double> integerDoubleEntry : value.entrySet()) {
+                        sum += integerDoubleEntry.getValue();
+                    }
+                    tmpMap = new TreeMap<>();
+                    tmpMap.put(1, sum);
+                    getPressureDropConsistencyMapNumsZSum().put(longMapEntry.getKey(), tmpMap);
+                }
+            }
+        }
+    }
+
+    /**
+     * 统计z的数据
+     *
+     * @param zSum
+     * @param type
+     * @return void
+     * @author liwenjie
+     * @date 2020/6/9 8:46
+     */
+    private void doZ(Map<Long, Map<Integer, Double>> zSum, int type) {
+        if (null != zSum && zSum.size() > 0) {
+            if (1 == type) {
+                if (null != zSum && zSum.size() > 0) {
+                    for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : zSum.entrySet()) {
+                        if (getEzstartTime() == null) setEzstartTime(longMapEntry.getKey());
+                        Long startTime = getWeekLastTime(getEzstartTime());//
+                        while (longMapEntry.getKey() > startTime) {
+                            //如果当前时间小于startTime则为当前周的数据 否则则是新一周的数据  需要更新main.srartTime 并且添加新的数据到Mapweek
+                            setEzstartTime(longMapEntry.getKey());
+                            startTime = getWeekLastTime(getEzstartTime());
+                        }
+                        Map<Integer, Double> tmpMapWeek = getEntropyMapWeekXiShuSum().get(getEzstartTime());
+                        if (null == tmpMapWeek) {
+                            tmpMapWeek = new TreeMap<>(); //存放一周的数据
+                        }
+                        for (Map.Entry<Integer, Double> integerIntegerEntry : longMapEntry.getValue().entrySet()) {
+                            Integer monNum = integerIntegerEntry.getKey();
+                            Double nums = integerIntegerEntry.getValue();
+                            if (tmpMapWeek.containsKey(monNum)) {
+                                tmpMapWeek.put(monNum, tmpMapWeek.get(monNum) + nums);
+                            } else {
+                                tmpMapWeek.put(monNum, nums);
+                            }
+                        }
+                        getEntropyMapWeekXiShuSum().put(getEzstartTime(), tmpMapWeek);
+                    }
+                }
+            } else if (2 == type) {
+                if (null != zSum && zSum.size() > 0) {
+                    for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : zSum.entrySet()) {
+                        if (getVzstartTime() == null) setVzstartTime(longMapEntry.getKey());
+                        Long startTime = getWeekLastTime(getVzstartTime());//
+                        while (longMapEntry.getKey() > startTime) {
+                            //如果当前时间小于startTime则为当前周的数据 否则则是新一周的数据  需要更新main.srartTime 并且添加新的数据到Mapweek
+                            setVzstartTime(longMapEntry.getKey());
+                            startTime = getWeekLastTime(getVzstartTime());
+                        }
+                        Map<Integer, Double> tmpMapWeek = getVolatilityDetectionMapWeekZSum().get(getVzstartTime());
+                        if (null == tmpMapWeek) {
+                            tmpMapWeek = new TreeMap<>(); //存放一周的数据
+                        }
+                        for (Map.Entry<Integer, Double> integerIntegerEntry : longMapEntry.getValue().entrySet()) {
+                            Integer monNum = integerIntegerEntry.getKey();
+                            Double nums = integerIntegerEntry.getValue();
+                            if (tmpMapWeek.containsKey(monNum)) {
+                                tmpMapWeek.put(monNum, tmpMapWeek.get(monNum) + nums);
+                            } else {
+                                tmpMapWeek.put(monNum, nums);
+                            }
+                        }
+                        getVolatilityDetectionMapWeekZSum().put(getVzstartTime(), tmpMapWeek);
+                    }
+                }
+            } else if (3 == type) {
+                for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : zSum.entrySet()) {
+                    if (getPzstartTime() == null) setPzstartTime(longMapEntry.getKey());
+                    Long startTime = getWeekLastTime(getPzstartTime());//
+                    while (longMapEntry.getKey() > startTime) {
+                        //如果当前时间小于startTime则为当前周的数据 否则则是新一周的数据  需要更新main.srartTime 并且添加新的数据到Mapweek
+                        setPzstartTime(longMapEntry.getKey());
+                        startTime = getWeekLastTime(getPzstartTime());
+                    }
+                    Map<Integer, Double> tmpMapWeek = getPressureDropConsistencyMapWeekZSum().get(getPzstartTime());
+                    if (null == tmpMapWeek) {
+                        tmpMapWeek = new TreeMap<>(); //存放一周的数据
+                    }
+                    for (Map.Entry<Integer, Double> integerIntegerEntry : longMapEntry.getValue().entrySet()) {
+                        Integer monNum = integerIntegerEntry.getKey();
+                        Double nums = integerIntegerEntry.getValue();
+                        if (tmpMapWeek.containsKey(monNum)) {
+                            tmpMapWeek.put(monNum, tmpMapWeek.get(monNum) + nums);
+                        } else {
+                            tmpMapWeek.put(monNum, nums);
+                        }
+                    }
+                    getPressureDropConsistencyMapWeekZSum().put(getPzstartTime(), tmpMapWeek);
+                }
+            }
+
+
+        }
+    }
+
+    /**
+     * 求 W
+     *
+     * @param mapDay
+     * @param type   1 熵值 2 波动 3 压降
+     * @return java.util.Map<java.lang.Long, java.lang.Integer>
+     * @author liwenjie
+     * @date 2020/6/5 13:59
+     */
+    public void doW(Map<Long, Map<Integer, Integer>> mapDay, int type) {
+        Map<Integer, Map<Long, Integer>> dayNumMap = new TreeMap<>();
+        if (null != mapDay && mapDay.size() > 0) {
+            Set<Long> longs = mapDay.keySet();
+            for (int i = 0; i < getBatteryNum(); i++) {
+                Map<Long, Integer> longIntegerMap = new TreeMap<>();
+                for (Long aLong : longs) {
+                    longIntegerMap.put(aLong, getIntegerNum(mapDay.get(aLong).get(i + 1)));
+                }
+                dayNumMap.put(i + 1, longIntegerMap);
+            }
+        }
+        Map<Integer, Map<Long, Integer>> resultDayNumMap = new TreeMap<>();
+        for (Map.Entry<Integer, Map<Long, Integer>> integerMapEntry : dayNumMap.entrySet()) {
+            Integer key = integerMapEntry.getKey();
+            Map<Long, Integer> value = integerMapEntry.getValue();
+            int last = 0;
+            Map<Long, Integer> longIntegerMap = new TreeMap<>();
+            for (Map.Entry<Long, Integer> longIntegerEntry : value.entrySet()) {
+                longIntegerMap.put(longIntegerEntry.getKey(), longIntegerEntry.getValue() - last);
+                last = longIntegerEntry.getValue();
+            }
+            resultDayNumMap.put(key, longIntegerMap);
+        }
+        if (1 == type) {
+            setEntropyMapDayW(resultDayNumMap);
+        } else if (2 == type) {
+            setVolatilityDetectionMapDayW(resultDayNumMap);
+        } else if (3 == type) {
+            setPressureDropConsistencyMapDayW(resultDayNumMap);
+        }
+    }
+
+    public void doWNums(Map<Long, Map<Integer, Integer>> mapDay, int type) {
+        Map<Integer, Map<Long, Integer>> dayNumMap = new TreeMap<>();
+        if (null != mapDay && mapDay.size() > 0) {
+            Set<Long> longs = mapDay.keySet();
+            for (int i = 0; i < getBatteryNum(); i++) {
+                Map<Long, Integer> longIntegerMap = new TreeMap<>();
+                for (Long aLong : longs) {
+                    longIntegerMap.put(aLong, getIntegerNum(mapDay.get(aLong).get(i + 1)));
+                }
+                dayNumMap.put(i + 1, longIntegerMap);
+            }
+        }
+        Map<Integer, Map<Long, Integer>> resultDayNumMap = new TreeMap<>();
+        for (Map.Entry<Integer, Map<Long, Integer>> integerMapEntry : dayNumMap.entrySet()) {
+            Integer key = integerMapEntry.getKey();
+            Map<Long, Integer> value = integerMapEntry.getValue();
+            int last = 0;
+            Map<Long, Integer> longIntegerMap = new TreeMap<>();
+            for (Map.Entry<Long, Integer> longIntegerEntry : value.entrySet()) {
+                longIntegerMap.put(longIntegerEntry.getKey(), longIntegerEntry.getValue() - last);
+                last = longIntegerEntry.getValue();
+            }
+            resultDayNumMap.put(key, longIntegerMap);
+        }
+        if (1 == type) {
+            setEntropyMapNumsW(resultDayNumMap);
+        } else if (2 == type) {
+            setVolatilityDetectionMapNumsW(resultDayNumMap);
+        } else if (3 == type) {
+            setPressureDropConsistencyMapNumsW(resultDayNumMap);
+        }
+    }
+
+    /**
+     * 求 X Y
+     *
+     * @param weekDay
+     * @param
+     * @return java.util.Map<java.lang.Long, java.lang.Integer>
+     * @author liwenjie
+     * @date 2020/6/5 13:59
+     */
+    public void doXY(Map<Long, Map<Integer, Integer>> weekDay, int type) {
+        Map<Long, Integer> mapWeekSum = new TreeMap<>();
+        if (null != weekDay && weekDay.size() > 0) {
+
+            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : weekDay.entrySet()) {
+                Integer weekSum = mapWeekSum.get(longMapEntry.getKey());
+                Map<Integer, Integer> dayValue = longMapEntry.getValue();
+                if (null == weekSum) weekSum = 0;
+                for (Map.Entry<Integer, Integer> integerIntegerEntry : dayValue.entrySet()) {
+                    weekSum += integerIntegerEntry.getValue();
+                }
+                mapWeekSum.put(longMapEntry.getKey(), weekSum);
+            }
+        }
+        if (1 == type) {
+            setEntropyMapWeekSum(mapWeekSum);
+        } else if (2 == type) {
+            setVolatilityDetectionMapWeekSum(mapWeekSum);
+        } else if (3 == type) {
+            setPressureDropConsistencyMapWeekSum(mapWeekSum);
+        }
+    }
+
+    /**
+     * 求 X Y
+     *
+     * @param weekDay
+     * @param
+     * @return java.util.Map<java.lang.Long, java.lang.Integer>
+     * @author liwenjie
+     * @date 2020/6/5 13:59
+     */
+    public void doXYNums(Map<Long, Map<Integer, Integer>> weekDay, int type) {
+        Map<Long, Integer> mapWeekSum = new TreeMap<>();
+        if (null != weekDay && weekDay.size() > 0) {
+
+            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : weekDay.entrySet()) {
+                Integer weekSum = mapWeekSum.get(longMapEntry.getKey());
+                Map<Integer, Integer> dayValue = longMapEntry.getValue();
+                if (null == weekSum) weekSum = 0;
+                for (Map.Entry<Integer, Integer> integerIntegerEntry : dayValue.entrySet()) {
+                    weekSum += integerIntegerEntry.getValue();
+                }
+                mapWeekSum.put(longMapEntry.getKey(), weekSum);
+            }
+        }
+        if (1 == type) {
+            setEntropyMapNumsSum(mapWeekSum);
+        } else if (2 == type) {
+            setVolatilityDetectionMapNumsSum(mapWeekSum);
+        } else if (3 == type) {
+            setPressureDropConsistencyMapNumsSum(mapWeekSum);
+        }
+    }
+
 
     /**
      * 获取文件数据日期
@@ -867,9 +1076,15 @@ public class FrequencyStatistics {
         ResultWriteToCsv(outPath, getVolatilityDetectionMapBatterSum(), "波动一致性故障诊断模型", getVolatilityDetectionSum());
         ResultWriteToCsvWeek(outPath, getVolatilityDetectionMapWeek(), "波动一致性故障诊断模型");
 
-        ResultWriteToCsvWeekX(outPath, getVolatilityDetectionMapWeekSum(), "波动一致性故障诊断模型");
-        ResultWriteToCsvWeekW(outPath, getVolatilityDetectionMapDayW(), "波动一致性故障诊断模型");
-        ResultWriteToCsvWeekZ(outPath, getVolatilityDetectionMapWeekVSum(), "波动一致性故障诊断模型");
+        ResultWriteToCsvWeekX(outPath, getVolatilityDetectionMapWeekSum(), "波动一致性故障诊断模型_周");
+        ResultWriteToCsvWeekW(outPath, getVolatilityDetectionMapDayW(), "波动一致性故障诊断模型_日");
+        ResultWriteToCsvWeekZ(outPath, getVolatilityDetectionMapWeekZSum(), "波动一致性故障诊断模型_周");
+
+        ResultWriteToCsvWeekX(outPath, getVolatilityDetectionMapNumsSum(), "波动一致性故障诊断模型_500帧");
+        ResultWriteToCsvWeekW(outPath, getVolatilityDetectionMapNumsW(), "波动一致性故障诊断模型_500帧");
+        ResultWriteToCsvWeekZ(outPath, getVolatilityDetectionMapNumsZSum(), "波动一致性故障诊断模型_500帧");
+
+
         ResultWriteToCsvType(outPath, getVolatilityDetectionMapType(), "波动一致性故障诊断模型");
     }
 
@@ -891,9 +1106,14 @@ public class FrequencyStatistics {
         ResultWriteToCsv(outPath, getPressureDropConsistencyMapBatterSum(), "压降一致性故障诊断模型", getPressureDropConsistencySum());
         ResultWriteToCsvWeek(outPath, getPressureDropConsistencyMapWeek(), "压降一致性故障诊断模型");
 
-        ResultWriteToCsvWeekX(outPath, getPressureDropConsistencyMapWeekSum(), "压降一致性故障诊断模型");
-        ResultWriteToCsvWeekW(outPath, getPressureDropConsistencyMapDayW(), "压降一致性故障诊断模型");
-        ResultWriteToCsvWeekZ(outPath, getPressureDropConsistencyMapWeekZSum(), "压降一致性故障诊断模型");
+        ResultWriteToCsvWeekX(outPath, getPressureDropConsistencyMapWeekSum(), "压降一致性故障诊断模型_周");
+        ResultWriteToCsvWeekW(outPath, getPressureDropConsistencyMapDayW(), "压降一致性故障诊断模型_日");
+        ResultWriteToCsvWeekZ(outPath, getPressureDropConsistencyMapWeekZSum(), "压降一致性故障诊断模型_周");
+
+        ResultWriteToCsvWeekX(outPath, getPressureDropConsistencyMapNumsSum(), "压降一致性故障诊断模型_500帧");
+        ResultWriteToCsvWeekW(outPath, getPressureDropConsistencyMapNumsW(), "压降一致性故障诊断模型_500帧");
+        ResultWriteToCsvWeekZ(outPath, getPressureDropConsistencyMapNumsZSum(), "压降一致性故障诊断模型_500帧");
+
         ResultWriteToCsvType(outPath, getPressureDropConsistencyMapType(), "压降一致性故障诊断模型");
 
     }
@@ -919,9 +1139,14 @@ public class FrequencyStatistics {
         if (null == entropyMapWeekXiShuSum || entropyMapWeekXiShuSum.size() == 0) return;
         BaseWriteToCSVXiShu(outPath, entropyMapWeekXiShuSum, "熵值故障诊断模型", "周");
 //
-        ResultWriteToCsvWeekX(outPath, getEntropyMapWeekSum(), "熵值故障诊断模型");
-        ResultWriteToCsvWeekW(outPath, getEntropyMapDayW(), "熵值故障诊断模型");
-        ResultWriteToCsvWeekZ(outPath, getEntropyMapWeekXiShuSum(), "熵值故障诊断模型");
+        ResultWriteToCsvWeekX(outPath, getEntropyMapWeekSum(), "熵值故障诊断模型_周");
+        ResultWriteToCsvWeekW(outPath, getEntropyMapDayW(), "熵值故障诊断模型_日");
+        ResultWriteToCsvWeekZ(outPath, getEntropyMapWeekXiShuSum(), "熵值故障诊断模型_周");
+
+        ResultWriteToCsvWeekX(outPath, getEntropyMapNumsSum(), "熵值故障诊断模型_500帧");
+        ResultWriteToCsvWeekW(outPath, getEntropyMapNumsW(), "熵值故障诊断模型_500帧");
+        ResultWriteToCsvWeekZ(outPath, getEntropyMapNumsXiShuSum(), "熵值故障诊断模型_500帧");
+
         ResultWriteToCsvType(outPath, getEntropyMapType(), "熵值故障诊断模型");
     }
 
@@ -1581,7 +1806,7 @@ public class FrequencyStatistics {
         for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map.entrySet()) {
             stringFrequencyStatisticsEntry.getValue().setType("2");
             Integer integer = ConfigerIgnoreTheMonomer.getMonomerTotal().get(stringFrequencyStatisticsEntry.getKey());
-            if(null == integer) integer = 0;
+            if (null == integer) integer = 0;
             stringFrequencyStatisticsEntry.getValue().setBatteryNum(integer);
             logger.info("放电");
             logger.info("开始处理压降一致性文件");
@@ -1608,7 +1833,7 @@ public class FrequencyStatistics {
         for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map2.entrySet()) {
             stringFrequencyStatisticsEntry.getValue().setType("1");
             Integer integer = ConfigerIgnoreTheMonomer.getMonomerTotal().get(stringFrequencyStatisticsEntry.getKey());
-            if(null == integer) integer = 0;
+            if (null == integer) integer = 0;
             stringFrequencyStatisticsEntry.getValue().setBatteryNum(integer);
             logger.info("充电");
             logger.info("开始处理压降一致性文件");
@@ -1633,6 +1858,7 @@ public class FrequencyStatistics {
         }
         logger.info("-----------------------结束-------------------------------");
     }*/
+
     public static Map<String, FrequencyStatistics> mapCopy(Map<String, FrequencyStatistics> map) {
         Map<String, FrequencyStatistics> resultMap = new HashMap<>();
         for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map.entrySet()) {
