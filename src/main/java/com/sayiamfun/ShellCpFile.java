@@ -3,17 +3,15 @@ package com.sayiamfun;
 import com.sayiamfun.common.utils.ScanPackage;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class ShellCpFile {
 
     public static void main(String[] args) {
         //读取txt文件内容
-        String file = "C:\\Users\\liwenjie\\Desktop\\veh430.txt";
-        String file2 = "C:\\Users\\liwenjie\\Downloads\\veh_90_1.txt";
+        String file = "C:\\Users\\liwenjie\\Downloads\\veh103.txt";
+        String file2 = "C:\\Users\\liwenjie\\Downloads\\veh_87.txt";
         InputStreamReader ir = null;
         BufferedReader br = null;
         try {
@@ -34,9 +32,17 @@ public class ShellCpFile {
                 if ("".equals(line)) continue;
                 veh400List.add(line);
             }
+            int num = 0;
+            int fileNum = 0;
             for (String s : veh500List) {
-                if(!veh400List.contains(s)){
-                    System.out.println("cp -r "+s+" /opt/veh_90_5/");
+                if (!veh400List.contains(s)) {
+                    if (num % 3 == 0) {
+                        System.out.println("------------file------------------");
+                        num = 0;
+                        fileNum++;
+                    }
+                    System.out.println("cp -r " + s + " /opt/veh_103_" + fileNum + "/");
+                    num++;
                 }
             }
         } catch (IOException e) {

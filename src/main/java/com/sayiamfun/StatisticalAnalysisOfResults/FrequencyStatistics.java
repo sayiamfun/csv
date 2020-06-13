@@ -11,7 +11,6 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -29,11 +28,12 @@ public class FrequencyStatistics {
     public final static String encode = "GBK";
 
     private String type;
-    private int TimeDifference = 10 * 60;
+    private int TimeDifference = 3 * 60;
     private int volatilityNums = 500;//每多少帧数统计一次  波动
     private int pressureNums = 500;//每多少帧数统计一次  压降
     private int entropyNums = 500;//每多少帧数统计一次  熵值
     private int BatteryNum = 0;
+    private int IgnoreMonNum = 0;
     private String VIN;
     private String nowTime;
     private List<String> volatilityDetectionList = new LinkedList<>();//波动性
@@ -148,7 +148,7 @@ public class FrequencyStatistics {
             if (null == tmpMap) tmpMap = new TreeMap<>(); //存放一天的数据
             Map<Integer, Double> tmpSumMap = getVolatilityDetectionMapDayVSum().get(dataTime);
             if (null == tmpSumMap) tmpSumMap = new TreeMap<>();
-
+            lists.sort((o1, o2) -> new BigDecimal(o1.get(3)).compareTo(new BigDecimal(o2.get(3))));
             for (List<String> list : lists) {
                 if (!getType().equals(list.get(7))) continue;
                 if (null != list.get(6)) {
@@ -204,22 +204,18 @@ public class FrequencyStatistics {
                          * 充电状态
                          */
                         Long thisTime = Long.valueOf(list.get(3));
-                        Date thisdate = DateUtils.strToDate("" + thisTime);
-                        Date lastdate = DateUtils.strToDate("" + lastTime);
                         if (lastTime == 0) {
                             lastTime = thisTime;
                             lastStartTime = thisTime;
+                        }
+                        Date thisdate = DateUtils.strToDate("" + thisTime);
+                        Date lastdate = DateUtils.strToDate("" + lastTime);
+                        if (null != lastdate && ((thisdate.getTime() - lastdate.getTime()) / 1000) > getTimeDifference()) {
+                            lastTime = thisTime;
                             lastEndTime = thisTime;
-                            if (typeMap.containsKey(monNum)) {
-                                typeMap.put(monNum, typeMap.get(monNum) + 1);
-                            } else {
-                                typeMap.put(monNum, 1);
-                            }
-                        } else if (null != lastdate && ((thisdate.getTime() - lastdate.getTime()) / 1000) > getTimeDifference()) {
                             String s3 = "" + lastStartTime + "-" + lastEndTime;
                             getVolatilityDetectionMapType().put(s3, typeMap);
                             typeMap = new TreeMap<>();
-                            lastTime = thisTime;
                             lastStartTime = thisTime;
                         } else {
                             if (typeMap.containsKey(monNum)) {
@@ -389,7 +385,7 @@ public class FrequencyStatistics {
                 }
                 //获取电池单体数量
                 if (getBatteryNum() == 0)
-                    setBatteryNum(next.get(7).split("_").length);
+                    setBatteryNum(next.get(7).split("_").length + getIgnoreMonNum());
                 //获取vin
                 if (getVIN() == null)
                     setVIN(next.get(1));
@@ -426,6 +422,7 @@ public class FrequencyStatistics {
                 }
                 size = index2;
             }
+            lists.sort((o1, o2) -> new BigDecimal(o1.get(4)).compareTo(new BigDecimal(o2.get(4))));
             for (int i = 0; i < size; i++) {
                 /**
                  * 每天数据
@@ -460,22 +457,18 @@ public class FrequencyStatistics {
                  * 充电状态
                  */
                 Long thisTime = Long.valueOf(list.get(4));
-                Date thisdate = DateUtils.strToDate("" + thisTime);
-                Date lastdate = DateUtils.strToDate("" + lastTime);
                 if (lastTime == 0) {
                     lastTime = thisTime;
                     lastStartTime = thisTime;
+                }
+                Date thisdate = DateUtils.strToDate("" + thisTime);
+                Date lastdate = DateUtils.strToDate("" + lastTime);
+                if (null != lastdate && ((thisdate.getTime() - lastdate.getTime()) / 1000) > getTimeDifference()) {
+                    lastTime = thisTime;
                     lastEndTime = thisTime;
-                    if (typeMap.containsKey(monNum)) {
-                        typeMap.put(monNum, typeMap.get(monNum) + 1);
-                    } else {
-                        typeMap.put(monNum, 1);
-                    }
-                } else if (null != lastdate && ((thisdate.getTime() - lastdate.getTime()) / 1000) > getTimeDifference()) {
                     String s3 = "" + lastStartTime + "-" + lastEndTime;
                     getPressureDropConsistencyMapType().put(s3, typeMap);
                     typeMap = new TreeMap<>();
-                    lastTime = thisTime;
                     lastStartTime = thisTime;
                 } else {
                     if (typeMap.containsKey(monNum)) {
@@ -580,12 +573,13 @@ public class FrequencyStatistics {
             if (null == tmpMap) tmpMap = new TreeMap<>(); //存放一天的数据
             Map<Integer, Double> tmpSumMap = getEntropyMapDayXiShuSum().get(dataTime);
             if (null == tmpSumMap) tmpSumMap = new TreeMap<>(); //存放一天的(系数减去4)的和
+            lists.sort((o1, o2) -> new BigDecimal(o1.get(2)).compareTo(new BigDecimal(o2.get(2))));
             for (List<String> list : lists) {
                 if (!getType().equals(list.get(12))) continue;
                 int monNum = Integer.parseInt(list.get(8));
                 if (getBatteryNum() == 0) {
                     /** 存放单体数量 */
-                    setBatteryNum(list.get(10).split("_").length);
+                    setBatteryNum(list.get(10).split("_").length + getIgnoreMonNum());
                 }
                 if (new BigDecimal(list.get(9)).compareTo(new BigDecimal("4")) > 0) {
                     if (null == list.get(8)) continue;
@@ -638,22 +632,18 @@ public class FrequencyStatistics {
                      * 充电状态
                      */
                     Long thisTime = Long.valueOf(list.get(2));
-                    Date thisdate = DateUtils.strToDate("" + thisTime);
-                    Date lastdate = DateUtils.strToDate("" + lastTime);
                     if (lastTime == 0) {
                         lastTime = thisTime;
                         lastStartTime = thisTime;
+                    }
+                    Date thisdate = DateUtils.strToDate("" + thisTime);
+                    Date lastdate = DateUtils.strToDate("" + lastTime);
+                    if (null != lastdate && ((thisdate.getTime() - lastdate.getTime()) / 1000) > getTimeDifference()) {
+                        lastTime = thisTime;
                         lastEndTime = thisTime;
-                        if (typeMap.containsKey(monNum)) {
-                            typeMap.put(monNum, typeMap.get(monNum) + 1);
-                        } else {
-                            typeMap.put(monNum, 1);
-                        }
-                    } else if (null != lastdate && ((thisdate.getTime() - lastdate.getTime()) / 1000) > getTimeDifference()) {
                         String s3 = "" + lastStartTime + "-" + lastEndTime;
                         getEntropyMapType().put(s3, typeMap);
                         typeMap = new TreeMap<>();
-                        lastTime = thisTime;
                         lastStartTime = thisTime;
                     } else {
                         if (typeMap.containsKey(monNum)) {
@@ -1762,10 +1752,6 @@ public class FrequencyStatistics {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(new FrequencyStatistics().getWeekLastTime(20200126L));
-    }
-
     /**
      * 统计频次结果
      *
@@ -1858,7 +1844,6 @@ public class FrequencyStatistics {
         }
         logger.info("-----------------------结束-------------------------------");
     }*/
-
     public static Map<String, FrequencyStatistics> mapCopy(Map<String, FrequencyStatistics> map) {
         Map<String, FrequencyStatistics> resultMap = new HashMap<>();
         for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map.entrySet()) {

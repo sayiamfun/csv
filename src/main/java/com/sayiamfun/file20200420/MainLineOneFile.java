@@ -12,11 +12,11 @@ public class MainLineOneFile {
 
         InputStreamReader ir = null;
         BufferedReader reader = null;
-        String path = "D:\\车辆数据\\其他车辆数据\\LJNEDV1T4JN650206\\LJNEDV1T4JN650206_波动一致性故障诊断模型.csv";
+        String path = "C:\\Users\\liwenjie\\Downloads\\LB378Y4WXJA182683Shangzhi2019 (2).csv";
 
 
-        String startTime = "20200100000000";
-        String endTime = "20200201000000";
+        String startTime = "20190100000000";
+        String endTime = "20200101000000";
         List<Map<String, Object>> list = new LinkedList<>();
         Map<String, Object> tmpMap;
         try {
@@ -51,7 +51,7 @@ public class MainLineOneFile {
             String line = reader.readLine();
             while ((line = reader.readLine()) != null) {
                 String item[] = line.split(",");//CSV格式文件为逗号分隔符文件，这里根据逗号切分
-                if (new BigDecimal(item[2]).compareTo(new BigDecimal(startTime)) >= 0 && new BigDecimal(item[2]).compareTo(new BigDecimal(endTime)) < 0 && new BigDecimal(item[7]).compareTo(new BigDecimal("4")) > 0) {
+                if (new BigDecimal(item[2]).compareTo(new BigDecimal(startTime)) >= 0 && new BigDecimal(item[2]).compareTo(new BigDecimal(endTime)) < 0 && new BigDecimal(item[7]).compareTo(new BigDecimal("4")) < 0) {
                     tmpMap = new HashMap<>();
                     tmpMap.put("octime", item[2]);
                     tmpMap.put("stringvars", item[8]);
