@@ -141,7 +141,8 @@ public class FrequencyStatistics {
             if (!s.contains("_波动一致性故障诊断模型")) continue;
             int monSigama = 13;//单体和单体值
             int type = 7;//充放电状态
-            int abnormalMon = 6;//异常单体
+//            int abnormalMon = 6;//异常单体
+            int time = 3;//时间
             //获取时间
             Long dataTime = getaLongTime(s);
             setStartTime(dataTime);
@@ -151,13 +152,22 @@ public class FrequencyStatistics {
             if (null == tmpMap) tmpMap = new TreeMap<>(); //存放一天的数据
             Map<Integer, Double> tmpSumMap = getVolatilityDetectionMapDayVSum().get(dataTime);
             if (null == tmpSumMap) tmpSumMap = new TreeMap<>();
-            lists.sort((o1, o2) -> new BigDecimal(o1.get(3)).compareTo(new BigDecimal(o2.get(3))));
+            lists.sort((o1, o2) -> new BigDecimal(o1.get(time)).compareTo(new BigDecimal(o2.get(time))));
             for (List<String> list : lists) {
                 if (!getType().equals(list.get(type))) continue;
-                if (null != list.get(abnormalMon)) {
-                    String[] s1 = list.get(abnormalMon).split("_");
-                    for (String s2 : s1) {
-                        int monNum = Integer.parseInt(s2);
+                /**
+                 * 波动倍数差的和
+                 */
+                String quaList = list.get(monSigama);
+                String[] s4 = quaList.split("_");
+                for (String s3 : s4) {
+                    String[] split = s3.split(":");
+                    if (split.length == 2) {
+                        Integer smon = Integer.parseInt(split[0]);
+                        String sv = split[1];
+                        Double multiply = new BigDecimal(sv).subtract(new BigDecimal("3")).doubleValue();
+                        if (multiply <= 0) continue;
+                        int monNum = smon;
                         /**
                          * 每天数据
                          */
@@ -167,35 +177,6 @@ public class FrequencyStatistics {
                             tmpMap.put(monNum, 1);
                         }
                         /**
-                         * 波动倍数差的和
-                         */
-                        String quaList = list.get(monSigama);
-                        String[] s4 = quaList.split("_");
-                        for (String s3 : s4) {
-                            String[] split = s3.split(":");
-                            if (split.length == 2) {
-                                Integer smon = Integer.parseInt(split[0]);
-                                String sv = split[1];
-                                Double multiply = new BigDecimal(sv).subtract(new BigDecimal("3")).doubleValue();
-                                /**
-                                 * 每天波动倍数差的和
-                                 */
-                                if (tmpSumMap.containsKey(smon)) {
-                                    tmpSumMap.put(smon, tmpSumMap.get(smon) + multiply);
-                                } else {
-                                    tmpSumMap.put(smon, multiply);
-                                }
-                                /**
-                                 * 每1500帧波动倍数差的和
-                                 */
-                                if (numsSumpMap.containsKey(smon)) {
-                                    numsSumpMap.put(smon, numsSumpMap.get(smon) + multiply);
-                                } else {
-                                    numsSumpMap.put(smon, multiply);
-                                }
-                            }
-                        }
-                        /**
                          * 每1500条数据
                          */
                         if (numsMap.containsKey(monNum)) {
@@ -203,10 +184,29 @@ public class FrequencyStatistics {
                         } else {
                             numsMap.put(monNum, 1);
                         }
+
+
+                        /**
+                         * 每天波动倍数差的和
+                         */
+                        if (tmpSumMap.containsKey(smon)) {
+                            tmpSumMap.put(smon, tmpSumMap.get(smon) + multiply);
+                        } else {
+                            tmpSumMap.put(smon, multiply);
+                        }
+                        /**
+                         * 每1500帧波动倍数差的和
+                         */
+                        if (numsSumpMap.containsKey(smon)) {
+                            numsSumpMap.put(smon, numsSumpMap.get(smon) + multiply);
+                        } else {
+                            numsSumpMap.put(smon, multiply);
+                        }
+
                         /**
                          * 充电状态
                          */
-                        Long thisTime = Long.valueOf(list.get(3));
+                        Long thisTime = Long.valueOf(list.get(time));
                         if (lastTime == 0) {
                             lastTime = thisTime;
                             lastStartTime = thisTime;
@@ -216,8 +216,8 @@ public class FrequencyStatistics {
                         if (null != lastdate && ((thisdate.getTime() - lastdate.getTime()) / 1000) > getTimeDifference()) {
                             lastTime = thisTime;
                             lastEndTime = thisTime;
-                            String s3 = "" + lastStartTime + "-" + lastEndTime;
-                            getVolatilityDetectionMapType().put(s3, typeMap);
+                            String startTAndEndT = "" + lastStartTime + "-" + lastEndTime;
+                            getVolatilityDetectionMapType().put(startTAndEndT, typeMap);
                             typeMap = new TreeMap<>();
                             lastStartTime = thisTime;
                         } else {
@@ -233,7 +233,7 @@ public class FrequencyStatistics {
                 }
                 nums++;
                 /**
-                 * 每1500条数据
+                * 每1500条数据
                  */
                 if (nums >= getVolatilityNums()) {
                     getVolatilityDetectionMapNums().put(numsindex * 1L, numsMap);
@@ -256,9 +256,10 @@ public class FrequencyStatistics {
                 getVolatilityDetectionMapDayVSum().put(dataTime, tmpSumMap);
             }
             if (typeMap.size() > 0) {
-                String s3 = "" + lastStartTime + "-" + lastEndTime;
-                getVolatilityDetectionMapType().put(s3, typeMap);
+                String startTAndEndT = "" + lastStartTime + "-" + lastEndTime;
+                getVolatilityDetectionMapType().put(startTAndEndT, typeMap);
             }
+
         }
         if (nums > 0) {
             getVolatilityDetectionMapNums().put(numsindex * 1L, numsMap);
