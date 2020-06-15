@@ -73,7 +73,6 @@ public class FrequencyStatistics {
     private Map<Long, Map<Integer, Integer>> volatilityDetectionMapNums = new TreeMap<>();//波动每1500条
     private Map<String, Map<Integer, Integer>> volatilityDetectionMapType = new LinkedHashMap<>();//波动充电段
     private Map<Integer, Integer> volatilityDetectionMapBatterSum = new TreeMap<>();//波动每个单体出现总次数
-
     private Map<Long, Map<Integer, Integer>> EntropyMapDay = new TreeMap<>();//熵值每天
     private Map<Integer, Map<Long, Integer>> EntropyMapDayW = new TreeMap<>();//熵值W
     private Map<Integer, Map<Long, Integer>> EntropyMapNumsW = new TreeMap<>();//熵值1500帧W
@@ -233,7 +232,7 @@ public class FrequencyStatistics {
                 }
                 nums++;
                 /**
-                * 每1500条数据
+                 * 每1500条数据
                  */
                 if (nums >= getVolatilityNums()) {
                     getVolatilityDetectionMapNums().put(numsindex * 1L, numsMap);
@@ -351,15 +350,19 @@ public class FrequencyStatistics {
             if (null == tmpMap) tmpMap = new TreeMap<>(); //存放一天的数据
             Map<Integer, Double> tmpSumMap = getPressureDropConsistencyMapDayZSum().get(dataTime);
             if (null == tmpSumMap) tmpSumMap = new TreeMap<>();
-            //开始统计今天所有数据   将最小压差绝对值小于 0.02 的删除
             Iterator<List<String>> iterator = lists.iterator();
             while (iterator.hasNext()) {
                 List<String> next = iterator.next();
+                int maxNums = 14;//绝对值最大压差值
+                int maxMon = 12;//最大值编号
+                int tyep = 15;//充电状态
+                int time = 4;//时间
+                int allMonNums = 7;//所有单体电压值
                 /**
                  * 压差倍数差的和
                  */
-                if (StringUtils.isNotEmpty(next.get(14)) && new BigDecimal(next.get(14)).compareTo(new BigDecimal("2")) > 0) {
-                    double v = new BigDecimal(next.get(14)).subtract(new BigDecimal("2")).doubleValue();
+                if (StringUtils.isNotEmpty(next.get(maxNums)) && new BigDecimal(next.get(maxNums)).compareTo(new BigDecimal("2")) > 0) {
+                    double v = new BigDecimal(next.get(maxNums)).subtract(new BigDecimal("2")).doubleValue();
                     /**
                      * 每天
                      */
@@ -386,104 +389,162 @@ public class FrequencyStatistics {
                         znums = 0;
                         znumsindex++;
                     }
+
+
+                    /**
+                     * 每天数据
+                     */
+                    List<String> list = next;
+                    int monNum = getInt(list.get(maxMon));
+                    if (!getType().equals(list.get(tyep))) continue;
+                    if (tmpMap.containsKey(monNum)) {
+                        tmpMap.put(monNum, tmpMap.get(monNum) + 1);
+                    } else {
+                        tmpMap.put(monNum, 1);
+                    }
+                    /**
+                     * 每1500条数据
+                     */
+                    if (numsMap.containsKey(monNum)) {
+                        numsMap.put(monNum, numsMap.get(monNum) + 1);
+                    } else {
+                        numsMap.put(monNum, 1);
+                    }
+                    nums++;
+                    /**
+                     * 每1500条数据放入
+                     */
+                    if (nums >= getPressureNums()) {
+                        getPressureDropConsistencyMapNums().put(numsindex * 1L, numsMap);
+                        numsMap = new TreeMap<>();
+                        nums = 0;
+                        numsindex++;
+                    }
+                    /**
+                     * 充电状态
+                     */
+                    Long thisTime = Long.valueOf(list.get(time));
+                    if (lastTime == 0) {
+                        lastTime = thisTime;
+                        lastStartTime = thisTime;
+                    }
+                    Date thisdate = DateUtils.strToDate("" + thisTime);
+                    Date lastdate = DateUtils.strToDate("" + lastTime);
+                    if (null != lastdate && ((thisdate.getTime() - lastdate.getTime()) / 1000) > getTimeDifference()) {
+                        lastTime = thisTime;
+                        lastEndTime = thisTime;
+                        String s3 = "" + lastStartTime + "-" + lastEndTime;
+                        getPressureDropConsistencyMapType().put(s3, typeMap);
+                        typeMap = new TreeMap<>();
+                        lastStartTime = thisTime;
+                    } else {
+                        if (typeMap.containsKey(monNum)) {
+                            typeMap.put(monNum, typeMap.get(monNum) + 1);
+                        } else {
+                            typeMap.put(monNum, 1);
+                        }
+                        lastTime = thisTime;
+                        lastEndTime = thisTime;
+                    }
                 }
                 //获取电池单体数量
                 if (getBatteryNum() == 0)
-                    setBatteryNum(next.get(7).split("_").length + getIgnoreMonNum());
+                    setBatteryNum(next.get(allMonNums).split("_").length + getIgnoreMonNum());
                 //获取vin
                 if (getVIN() == null)
                     setVIN(next.get(1));
                 //删除不符合条件的数据
-                if (new BigDecimal(next.get(11)).abs().compareTo(new BigDecimal("0.02")) < 0) {
-                    iterator.remove();
-                }
+//                if (new BigDecimal(next.get(11)).abs().compareTo(new BigDecimal("0.02")) < 0) {
+//                    iterator.remove();
+//                }
             }
             if (tmpSumMap.size() > 0) {
                 getPressureDropConsistencyMapDayZSum().put(dataTime, tmpSumMap);
             }
-            if (lists.size() == 0) continue;
-            //排序取最大压差绝对值与最小压差绝对值比最大的五条
-            Collections.sort(lists, new Comparator<List<String>>() {
-                @Override
-                public int compare(List<String> o1, List<String> o2) {
-                    if (new BigDecimal(o2.get(14)).compareTo(new BigDecimal(o1.get(14))) != 0)
-                        return new BigDecimal(o2.get(14)).compareTo(new BigDecimal(o1.get(14)));
-                    return new BigDecimal(o2.get(10)).abs().compareTo(new BigDecimal(o1.get(10)).abs());
-                }
-            });
-            //根据规则获取需要保留的数据
-            int size = lists.size();
-            if (size > 5) {
-                int index = 5;
-                int index2 = 5;
-                while (index < size && new BigDecimal(lists.get(index).get(14)).compareTo(new BigDecimal(lists.get(index - 1).get(14))) == 0) {
-                    index++;
-                }
-                if (index > 5) {
-                    while (index2 < index && new BigDecimal(lists.get(index2).get(10)).abs().compareTo(new BigDecimal(lists.get(index2 - 1).get(10)).abs()) == 0) {
-                        index2++;
-                    }
-                }
-                size = index2;
-            }
-            lists.sort((o1, o2) -> new BigDecimal(o1.get(4)).compareTo(new BigDecimal(o2.get(4))));
-            for (int i = 0; i < size; i++) {
-                /**
-                 * 每天数据
-                 */
-                List<String> list = lists.get(i);
-                int monNum = getInt(list.get(12));
-                if (!getType().equals(list.get(15))) continue;
-                if (tmpMap.containsKey(monNum)) {
-                    tmpMap.put(monNum, tmpMap.get(monNum) + 1);
-                } else {
-                    tmpMap.put(monNum, 1);
-                }
-                /**
-                 * 每1500条数据
-                 */
-                if (numsMap.containsKey(monNum)) {
-                    numsMap.put(monNum, numsMap.get(monNum) + 1);
-                } else {
-                    numsMap.put(monNum, 1);
-                }
-                nums++;
-                /**
-                 * 每1500条数据放入
-                 */
-                if (nums >= getPressureNums()) {
-                    getPressureDropConsistencyMapNums().put(numsindex * 1L, numsMap);
-                    numsMap = new TreeMap<>();
-                    nums = 0;
-                    numsindex++;
-                }
-                /**
-                 * 充电状态
-                 */
-                Long thisTime = Long.valueOf(list.get(4));
-                if (lastTime == 0) {
-                    lastTime = thisTime;
-                    lastStartTime = thisTime;
-                }
-                Date thisdate = DateUtils.strToDate("" + thisTime);
-                Date lastdate = DateUtils.strToDate("" + lastTime);
-                if (null != lastdate && ((thisdate.getTime() - lastdate.getTime()) / 1000) > getTimeDifference()) {
-                    lastTime = thisTime;
-                    lastEndTime = thisTime;
-                    String s3 = "" + lastStartTime + "-" + lastEndTime;
-                    getPressureDropConsistencyMapType().put(s3, typeMap);
-                    typeMap = new TreeMap<>();
-                    lastStartTime = thisTime;
-                } else {
-                    if (typeMap.containsKey(monNum)) {
-                        typeMap.put(monNum, typeMap.get(monNum) + 1);
-                    } else {
-                        typeMap.put(monNum, 1);
-                    }
-                    lastTime = thisTime;
-                    lastEndTime = thisTime;
-                }
-            }
+//            if (lists.size() == 0) continue;
+//            //开始统计今天所有数据   将最小压差绝对值小于 0.02 的删除
+//            //排序取最大压差绝对值与最小压差绝对值比最大的五条
+//            Collections.sort(lists, new Comparator<List<String>>() {
+//                @Override
+//                public int compare(List<String> o1, List<String> o2) {
+//                    if (new BigDecimal(o2.get(14)).compareTo(new BigDecimal(o1.get(14))) != 0)
+//                        return new BigDecimal(o2.get(14)).compareTo(new BigDecimal(o1.get(14)));
+//                    return new BigDecimal(o2.get(10)).abs().compareTo(new BigDecimal(o1.get(10)).abs());
+//                }
+//            });
+//            //根据规则获取需要保留的数据
+//            int size = lists.size();
+//            if (size > 5) {
+//                int index = 5;
+//                int index2 = 5;
+//                while (index < size && new BigDecimal(lists.get(index).get(14)).compareTo(new BigDecimal(lists.get(index - 1).get(14))) == 0) {
+//                    index++;
+//                }
+//                if (index > 5) {
+//                    while (index2 < index && new BigDecimal(lists.get(index2).get(10)).abs().compareTo(new BigDecimal(lists.get(index2 - 1).get(10)).abs()) == 0) {
+//                        index2++;
+//                    }
+//                }
+//                size = index2;
+//            }
+//            lists.sort((o1, o2) -> new BigDecimal(o1.get(4)).compareTo(new BigDecimal(o2.get(4))));
+//            for (int i = 0; i < size; i++) {
+//                /**
+//                 * 每天数据
+//                 */
+//                List<String> list = lists.get(i);
+//                int monNum = getInt(list.get(12));
+//                if (!getType().equals(list.get(15))) continue;
+//                if (tmpMap.containsKey(monNum)) {
+//                    tmpMap.put(monNum, tmpMap.get(monNum) + 1);
+//                } else {
+//                    tmpMap.put(monNum, 1);
+//                }
+//                /**
+//                 * 每1500条数据
+//                 */
+//                if (numsMap.containsKey(monNum)) {
+//                    numsMap.put(monNum, numsMap.get(monNum) + 1);
+//                } else {
+//                    numsMap.put(monNum, 1);
+//                }
+//                nums++;
+//                /**
+//                 * 每1500条数据放入
+//                 */
+//                if (nums >= getPressureNums()) {
+//                    getPressureDropConsistencyMapNums().put(numsindex * 1L, numsMap);
+//                    numsMap = new TreeMap<>();
+//                    nums = 0;
+//                    numsindex++;
+//                }
+//                /**
+//                 * 充电状态
+//                 */
+//                Long thisTime = Long.valueOf(list.get(4));
+//                if (lastTime == 0) {
+//                    lastTime = thisTime;
+//                    lastStartTime = thisTime;
+//                }
+//                Date thisdate = DateUtils.strToDate("" + thisTime);
+//                Date lastdate = DateUtils.strToDate("" + lastTime);
+//                if (null != lastdate && ((thisdate.getTime() - lastdate.getTime()) / 1000) > getTimeDifference()) {
+//                    lastTime = thisTime;
+//                    lastEndTime = thisTime;
+//                    String s3 = "" + lastStartTime + "-" + lastEndTime;
+//                    getPressureDropConsistencyMapType().put(s3, typeMap);
+//                    typeMap = new TreeMap<>();
+//                    lastStartTime = thisTime;
+//                } else {
+//                    if (typeMap.containsKey(monNum)) {
+//                        typeMap.put(monNum, typeMap.get(monNum) + 1);
+//                    } else {
+//                        typeMap.put(monNum, 1);
+//                    }
+//                    lastTime = thisTime;
+//                    lastEndTime = thisTime;
+//                }
+//            }
             //将当天数据放入
             if (tmpMap.size() > 0) {
                 getPressureDropConsistencyMapDay().put(dataTime, tmpMap);
@@ -579,14 +640,31 @@ public class FrequencyStatistics {
             if (null == tmpSumMap) tmpSumMap = new TreeMap<>(); //存放一天的(系数减去4)的和
             lists.sort((o1, o2) -> new BigDecimal(o1.get(2)).compareTo(new BigDecimal(o2.get(2))));
             for (List<String> list : lists) {
-                if (!getType().equals(list.get(12))) continue;
-                int monNum = Integer.parseInt(list.get(8));
+
+                int time = 2;//时间
+                int type = 12;//充放电状态
+                int maxMon = 8;//最大单体编号
+                int maxNums = 9;//最大熵值系数
+                int allMonNums = 10;//所有单体熵值系数
+                if (!getType().equals(list.get(type))) continue;
+                int monNum = Integer.parseInt(list.get(maxMon));
                 if (getBatteryNum() == 0) {
                     /** 存放单体数量 */
-                    setBatteryNum(list.get(10).split("_").length + getIgnoreMonNum());
+                    setBatteryNum(list.get(allMonNums).split("_").length + getIgnoreMonNum());
                 }
-                if (new BigDecimal(list.get(9)).compareTo(new BigDecimal("4")) > 0) {
-                    if (null == list.get(8)) continue;
+                nums++;
+                /**
+                 * 每1500条数据 存储
+                 */
+                if (nums >= getEntropyNums()) {
+                    getEntropyMapNums().put(index * 1L, numsMap);
+                    numsMap = new TreeMap<>();
+                    getEntropyMapNumsXiShuSum().put(index * 1L, numsSumMap);
+                    numsSumMap = new TreeMap<>();
+                    nums = 0;
+                    index++;
+                }
+                if (new BigDecimal(list.get(maxNums)).compareTo(new BigDecimal("4")) > 0) {
                     /**
                      * 天数据
                      */
@@ -598,7 +676,7 @@ public class FrequencyStatistics {
                     /**
                      * 天系数差的和数据
                      */
-                    double v = new BigDecimal(list.get(9)).subtract(new BigDecimal("4")).doubleValue();
+                    double v = new BigDecimal(list.get(maxNums)).subtract(new BigDecimal("4")).doubleValue();
                     if (tmpSumMap.containsKey(monNum)) {
                         tmpSumMap.put(monNum, tmpSumMap.get(monNum) + v);
                     } else {
@@ -612,30 +690,19 @@ public class FrequencyStatistics {
                     } else {
                         numsSumMap.put(monNum, v);
                     }
+
                     /**
-                     * 每1500条数据
+                     * 每1500条数据 单体
                      */
                     if (numsMap.containsKey(monNum)) {
                         numsMap.put(monNum, numsMap.get(monNum) + 1);
                     } else {
                         numsMap.put(monNum, 1);
                     }
-                    nums++;
-                    /**
-                     * 每1500条数据
-                     */
-                    if (nums >= getEntropyNums()) {
-                        getEntropyMapNums().put(index * 1L, numsMap);
-                        numsMap = new TreeMap<>();
-                        getEntropyMapNumsXiShuSum().put(index * 1L, numsSumMap);
-                        numsSumMap = new TreeMap<>();
-                        nums = 0;
-                        index++;
-                    }
                     /**
                      * 充电状态
                      */
-                    Long thisTime = Long.valueOf(list.get(2));
+                    Long thisTime = Long.valueOf(list.get(time));
                     if (lastTime == 0) {
                         lastTime = thisTime;
                         lastStartTime = thisTime;
