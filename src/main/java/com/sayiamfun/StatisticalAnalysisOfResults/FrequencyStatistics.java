@@ -139,6 +139,9 @@ public class FrequencyStatistics {
 
         for (String s : getVolatilityDetectionList()) {
             if (!s.contains("_波动一致性故障诊断模型")) continue;
+            int monSigama = 13;//单体和单体值
+            int type = 7;//充放电状态
+            int abnormalMon = 6;//异常单体
             //获取时间
             Long dataTime = getaLongTime(s);
             setStartTime(dataTime);
@@ -150,9 +153,9 @@ public class FrequencyStatistics {
             if (null == tmpSumMap) tmpSumMap = new TreeMap<>();
             lists.sort((o1, o2) -> new BigDecimal(o1.get(3)).compareTo(new BigDecimal(o2.get(3))));
             for (List<String> list : lists) {
-                if (!getType().equals(list.get(7))) continue;
-                if (null != list.get(6)) {
-                    String[] s1 = list.get(6).split("_");
+                if (!getType().equals(list.get(type))) continue;
+                if (null != list.get(abnormalMon)) {
+                    String[] s1 = list.get(abnormalMon).split("_");
                     for (String s2 : s1) {
                         int monNum = Integer.parseInt(s2);
                         /**
@@ -166,7 +169,7 @@ public class FrequencyStatistics {
                         /**
                          * 波动倍数差的和
                          */
-                        String quaList = list.get(13);
+                        String quaList = list.get(monSigama);
                         String[] s4 = quaList.split("_");
                         for (String s3 : s4) {
                             String[] split = s3.split(":");
