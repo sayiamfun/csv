@@ -12,7 +12,7 @@ import java.util.*;
 public class TestFrequencyStatistics {
 
 
-    static String inpath = "/Users/liwenjie/Downloads/vehData/vehOut/20200615134352/";
+    static String inpath = "/Users/liwenjie/Downloads/vehData/vehOut/20200616140127/";
     static String outPath = inpath + "out/";
 
     public static void main(String[] args) {

@@ -154,6 +154,7 @@ public class FrequencyStatistics {
             lists.sort((o1, o2) -> new BigDecimal(o1.get(time)).compareTo(new BigDecimal(o2.get(time))));
             for (List<String> list : lists) {
                 if (!getType().equals(list.get(type))) continue;
+                if (list.size() < monSigama + 1) continue;
                 /**
                  * 波动倍数差的和
                  */
@@ -328,9 +329,7 @@ public class FrequencyStatistics {
      */
     public void doPressureDropConsistencyDayAndNums() {
         int nums = 0;
-        int znums = 0;
         int numsindex = 1;
-        int znumsindex = 1;
         Map<Integer, Integer> numsMap = new TreeMap<>(); //存放每1500条的数据 单体频次
         Map<Integer, Integer> typeMap = new TreeMap<>(); //存放分段数据 单体频次
         Map<Integer, Double> numsSumMap = new TreeMap<>(); //存放分段数据 压差倍数的差值
@@ -353,11 +352,24 @@ public class FrequencyStatistics {
             Iterator<List<String>> iterator = lists.iterator();
             while (iterator.hasNext()) {
                 List<String> next = iterator.next();
-                int maxNums = 14;//绝对值最大压差值
                 int maxMon = 12;//最大值编号
                 int tyep = 15;//充电状态
                 int time = 4;//时间
                 int allMonNums = 7;//所有单体电压值
+                int maxNums = 14;//绝对值最大压差值
+                if (next.size() < tyep + 1) continue;
+                nums++;
+                /**
+                 * 每1500条数据放入
+                 */
+                if (nums >= getPressureNums()) {
+                    getPressureDropConsistencyMapNums().put(numsindex * 1L, numsMap);
+                    numsMap = new TreeMap<>();
+                    getPressureDropConsistencyMapNumsZSum().put(numsindex * 1L, numsSumMap);
+                    numsSumMap = new TreeMap<>();
+                    nums = 0;
+                    numsindex++;
+                }
                 /**
                  * 压差倍数差的和
                  */
@@ -379,17 +391,6 @@ public class FrequencyStatistics {
                     } else {
                         numsSumMap.put(1, v);
                     }
-                    znums++;
-                    /**
-                     * 每1500条数据放入
-                     */
-                    if (znums >= getPressureNums()) {
-                        getPressureDropConsistencyMapNumsZSum().put(znumsindex * 1L, numsSumMap);
-                        numsMap = new TreeMap<>();
-                        znums = 0;
-                        znumsindex++;
-                    }
-
 
                     /**
                      * 每天数据
@@ -410,16 +411,7 @@ public class FrequencyStatistics {
                     } else {
                         numsMap.put(monNum, 1);
                     }
-                    nums++;
-                    /**
-                     * 每1500条数据放入
-                     */
-                    if (nums >= getPressureNums()) {
-                        getPressureDropConsistencyMapNums().put(numsindex * 1L, numsMap);
-                        numsMap = new TreeMap<>();
-                        nums = 0;
-                        numsindex++;
-                    }
+
                     /**
                      * 充电状态
                      */
@@ -556,10 +548,9 @@ public class FrequencyStatistics {
         }
         if (nums > 0) {
             getPressureDropConsistencyMapNums().put(numsindex * 1L, numsMap);
+            getPressureDropConsistencyMapNumsZSum().put(numsindex * 1L, numsSumMap);
         }
-        if (znums > 0) {
-            getPressureDropConsistencyMapNumsZSum().put(znumsindex * 1L, numsSumMap);
-        }
+
     }
 
     /**
@@ -640,13 +631,13 @@ public class FrequencyStatistics {
             if (null == tmpSumMap) tmpSumMap = new TreeMap<>(); //存放一天的(系数减去4)的和
             lists.sort((o1, o2) -> new BigDecimal(o1.get(2)).compareTo(new BigDecimal(o2.get(2))));
             for (List<String> list : lists) {
-
                 int time = 2;//时间
                 int type = 12;//充放电状态
                 int maxMon = 8;//最大单体编号
                 int maxNums = 9;//最大熵值系数
                 int allMonNums = 10;//所有单体熵值系数
                 if (!getType().equals(list.get(type))) continue;
+                if (list.size() < type + 1) continue;
                 int monNum = Integer.parseInt(list.get(maxMon));
                 if (getBatteryNum() == 0) {
                     /** 存放单体数量 */
@@ -1914,7 +1905,8 @@ public class FrequencyStatistics {
             stringFrequencyStatisticsEntry.getValue().outIcon(outputPath);
         }
         logger.info("-----------------------结束-------------------------------");
-    }*/
+    }
+    */
     public static Map<String, FrequencyStatistics> mapCopy(Map<String, FrequencyStatistics> map) {
         Map<String, FrequencyStatistics> resultMap = new HashMap<>();
         for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map.entrySet()) {
