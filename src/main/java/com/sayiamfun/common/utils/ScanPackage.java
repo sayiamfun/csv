@@ -212,7 +212,7 @@ public class ScanPackage {
                         scanFilesWithRecursion(filelist[i].getAbsolutePath());
                     }
                     /**非文件夹**/
-                    else if (filelist[i].getAbsolutePath().contains(".csv") && !filelist[i].getAbsolutePath().contains("\\0_") && (filelist[i].getAbsolutePath().contains("熵值故障诊断模型") || filelist[i].getAbsolutePath().contains("波动一致性故障诊断模型") || filelist[i].getAbsolutePath().contains("压降一致性故障诊断模型"))) {
+                    else if (filelist[i].getAbsolutePath().contains(".csv") && !filelist[i].getAbsolutePath().contains("/0_") && (filelist[i].getAbsolutePath().contains("熵值故障诊断模型") || filelist[i].getAbsolutePath().contains("波动一致性故障诊断模型") || filelist[i].getAbsolutePath().contains("压降一致性故障诊断模型"))) {
                         if (!scanFiles.contains(filelist[i].getAbsolutePath())) {
                             scanFiles.add(filelist[i].getAbsolutePath());
                         }
@@ -263,11 +263,7 @@ public class ScanPackage {
 
 
     public static void main(String[] args) {
-        try {
-            String m = null;
-            m.length();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        ArrayList<String> strings = scanFiles("/Users/liwenjie/fsdownload/103_veh_9/20200619193037/");
+        strings.forEach(System.out::println);
     }
 }

@@ -25,15 +25,15 @@ public class Merge2 {
         Document doc8 = null;
         Document doc9 = null;
         String file0 = Constant.templatePath3;
-        String fil1 = outPath + "/" + vin + "_" + type + "EARate.docx";
-        String fil2 = outPath + "/" + vin + "_" + type + "EENum.docx";
-        String fil3 = outPath + "/" + vin + "_" + type + "EWRate.docx";
-        String fil4 = outPath + "/" + vin + "_" + type + "PARate.docx";
-        String fil5 = outPath + "/" + vin + "_" + type + "PENum.docx";
-        String fil6 = outPath + "/" + vin + "_" + type + "PWRate.docx";
-        String fil7 = outPath + "/" + vin + "_" + type + "VARate.docx";
-        String fil8 = outPath + "/" + vin + "_" + type + "VENum.docx";
-        String fil9 = outPath + "/" + vin + "_" + type + "VWRate.docx";
+        String fil1 = outPath  + vin + "_" + type + "EARate.docx";
+        String fil2 = outPath  + vin + "_" + type + "EENum.docx";
+        String fil3 = outPath  + vin + "_" + type + "EWRate.docx";
+        String fil4 = outPath  + vin + "_" + type + "PARate.docx";
+        String fil5 = outPath  + vin + "_" + type + "PENum.docx";
+        String fil6 = outPath  + vin + "_" + type + "PWRate.docx";
+        String fil7 = outPath  + vin + "_" + type + "VARate.docx";
+        String fil8 = outPath  + vin + "_" + type + "VENum.docx";
+        String fil9 = outPath  + vin + "_" + type + "VWRate.docx";
         //加载需要合并的两个文档
         //加载需要合并的两个文档
         doc0 = new Document(file0);

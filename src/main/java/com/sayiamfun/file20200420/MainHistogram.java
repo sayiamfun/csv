@@ -13,7 +13,7 @@ public class MainHistogram {
 
         Map<String, FrequencyStatistics> map = new HashMap<>();
         //读取所有的文件路径
-        ArrayList<String> strings = ScanPackage.scanFilesWithRecursion("D:\\车辆数据\\其他车辆数据\\中\\LS5A2AJX8JA002135\\20200525172845");
+        ArrayList<String> strings = ScanPackage.scanFilesWithRecursion("/Users/liwenjie/Downloads/vehData/vehOut/20200616142127/");
         Collections.sort(strings, new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
@@ -51,17 +51,21 @@ public class MainHistogram {
         InputStreamReader ir = null;
         BufferedReader reader = null;
         Map<Integer, Integer> resultMap = new TreeMap<>();
-        for (String path : map.get("LS5A2AJX8JA002135").getVolatilityDetectionList()) {
+        for (String path : map.get("LNBMCU3K0HZ050159").getVolatilityDetectionList()) {
             try {
                 ir = new InputStreamReader(new FileInputStream(new File(path)), ScanPackage.encode);
                 reader = new BufferedReader(ir);//到读取的文件
                 String line = reader.readLine();
                 while ((line = reader.readLine()) != null) {
                     String item[] = line.split(",");//CSV格式文件为逗号分隔符文件，这里根据逗号切分
-                    if (new BigDecimal(item[3]).compareTo(new BigDecimal("20200501000000")) >= 0 && new BigDecimal(item[3]).compareTo(new BigDecimal("20200601000000")) < 0) {
-                        String[] s = item[6].split("_");
-                        for (String s1 : s) {
-                            int i = Integer.parseInt(s1);
+                    if (item.length < 14 || null == item[13]) continue;
+                    if (new BigDecimal(item[3]).compareTo(new BigDecimal("20200300000000")) >= 0 && new BigDecimal(item[3]).compareTo(new BigDecimal("20200400000000")) < 0) {
+                        String[] s2 = item[13].split("_");
+                        for (String s : s2) {
+                            String[] split = s.split(":");
+                            if (split.length != 2) continue;
+                            if (new BigDecimal(split[1]).compareTo(new BigDecimal("3")) < 0) continue;
+                            int i = Integer.parseInt(split[0]);
                             if (resultMap.containsKey(i)) {
                                 resultMap.put(i, resultMap.get(i) + 1);
                             } else {
@@ -81,8 +85,8 @@ public class MainHistogram {
                 }
             }
         }
-        System.out.println(resultMap.keySet());
-        System.out.println(resultMap.values());
+        System.out.println("var datax = " + resultMap.keySet() + ";");
+        System.out.println("var data1 = " + resultMap.values() + ";");
 
     }
 }

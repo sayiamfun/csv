@@ -12,7 +12,7 @@ import java.util.*;
 public class TestFrequencyStatistics {
 
 
-    static String inpath = "/Users/liwenjie/Downloads/vehData/vehOut/20200616140127/";
+    static String inpath = "/Users/liwenjie/Downloads/vehData/vehOut/20200623113648/";
     static String outPath = inpath + "out/";
 
     public static void main(String[] args) {
@@ -83,7 +83,7 @@ public class TestFrequencyStatistics {
             stringFrequencyStatisticsEntry.getValue().outVolatilityDetection(outPath);
             System.out.println("开始输出熵值结果");
             stringFrequencyStatisticsEntry.getValue().outEntropy(outPath);
-//            stringFrequencyStatisticsEntry.getValue().outIcon(outPath);
+            stringFrequencyStatisticsEntry.getValue().outIcon(outPath);
         }
 
         for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map2.entrySet()) {
@@ -107,7 +107,7 @@ public class TestFrequencyStatistics {
             stringFrequencyStatisticsEntry.getValue().outVolatilityDetection(outPath);
             System.out.println("开始输出熵值结果");
             stringFrequencyStatisticsEntry.getValue().outEntropy(outPath);
-//            stringFrequencyStatisticsEntry.getValue().outIcon(outPath);
+            stringFrequencyStatisticsEntry.getValue().outIcon(outPath);
         }
         System.out.println("-----------------------结束-------------------------------");
     }
