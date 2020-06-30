@@ -1079,8 +1079,9 @@ public class FrequencyStatistics {
      * @return
      */
     private Long getaLongTime(String s) {
-        String[] times = s.split("_");
-        String time1 = times[1];
+        String[] times = s.split("/");
+        String[] s1 = times[times.length - 1].split("_");
+        String time1 = s1[1];
         return Long.valueOf(time1);
     }
 

@@ -12,7 +12,7 @@ import java.util.*;
 public class TestFrequencyStatistics {
 
 
-    static String inpath = "/Users/liwenjie/Downloads/vehData/vehOut/20200623113648/";
+    static String inpath = "/Users/liwenjie/fsdownload/20200629130336/";
     static String outPath = inpath + "out/";
 
     public static void main(String[] args) {
@@ -29,15 +29,18 @@ public class TestFrequencyStatistics {
         Collections.sort(strings, new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
-                String[] s = o1.split("_");
-                String[] s1 = o2.split("_");
-                return Integer.parseInt(s[1]) - Integer.parseInt(s1[1]);
+                String[] s = o1.split("/");
+                String[] s2 = s[s.length - 1].split("_");
+                String[] s1 = o2.split("/");
+                String[] s3 = s1[s1.length - 1].split("_");
+                return Integer.parseInt(s2[1]) - Integer.parseInt(s3[1]);
             }
         });
         for (String string : strings) {
             if (!string.endsWith(".csv")) continue;
-            String[] s = string.split("_");
-            String vin = s[0].substring(s[0].length() - 17);
+            String[] s = string.split("/");
+            String[] s1 = s[s.length - 1].split("_");
+            String vin = s1[0].substring(s1[0].length() - 17);
             if (map.containsKey(vin)) {
                 if (string.contains("压降一致性故障诊断模型")) {
                     map.get(vin).getPressureDropConsistencyList().add(string);
@@ -112,10 +115,10 @@ public class TestFrequencyStatistics {
         System.out.println("-----------------------结束-------------------------------");
     }
 
-    public static Map<String,FrequencyStatistics> mapCopy(Map<String,FrequencyStatistics> map){
-        Map<String,FrequencyStatistics> resultMap = new HashMap<>();
+    public static Map<String, FrequencyStatistics> mapCopy(Map<String, FrequencyStatistics> map) {
+        Map<String, FrequencyStatistics> resultMap = new HashMap<>();
         for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map.entrySet()) {
-            resultMap.put(stringFrequencyStatisticsEntry.getKey(),new FrequencyStatistics(stringFrequencyStatisticsEntry.getValue()));
+            resultMap.put(stringFrequencyStatisticsEntry.getKey(), new FrequencyStatistics(stringFrequencyStatisticsEntry.getValue()));
         }
         return resultMap;
     }
