@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * 频次统计文件
@@ -32,6 +33,7 @@ public class FrequencyStatistics {
     private int volatilityNums = 500;//每多少帧数统计一次  波动
     private int pressureNums = 500;//每多少帧数统计一次  压降
     private int entropyNums = 500;//每多少帧数统计一次  熵值
+    private int zMaxNums = 5000;//Zmax每多少帧统计一次 所有模型
     private int BatteryNum = 0;
     private int IgnoreMonNum = 0;
     private String VIN;
@@ -60,6 +62,9 @@ public class FrequencyStatistics {
     private Map<Long, Map<Integer, Integer>> pressureDropConsistencyMapNums = new TreeMap<>();//压降每1500条
     private Map<String, Map<Integer, Integer>> pressureDropConsistencyMapType = new LinkedHashMap<>();//压降充电段
     private Map<Integer, Integer> pressureDropConsistencyMapBatterSum = new TreeMap<>();//压降每个单体出现总次数
+    private List<Map<Integer, Double>> pressureDropConsistencyZMaxMapList = new LinkedList<>();//压降计算Zmax使用
+    private Map<Long, Map<Integer, Double>> pressureDropConsistencyZMaxNums = new TreeMap<>();//压降每5000帧Zmax
+
 
     private Map<Long, Map<Integer, Integer>> volatilityDetectionMapDay = new TreeMap<>();//波动每天
     private Map<Integer, Map<Long, Integer>> volatilityDetectionMapDayW = new TreeMap<>();//波动W
@@ -73,6 +78,10 @@ public class FrequencyStatistics {
     private Map<Long, Map<Integer, Integer>> volatilityDetectionMapNums = new TreeMap<>();//波动每1500条
     private Map<String, Map<Integer, Integer>> volatilityDetectionMapType = new LinkedHashMap<>();//波动充电段
     private Map<Integer, Integer> volatilityDetectionMapBatterSum = new TreeMap<>();//波动每个单体出现总次数
+    private List<Map<Integer, Double>> volatilityDetectionZmaxMapList = new LinkedList<>();//波动计算Zmax使用
+    private Map<Long, Map<Integer, Double>> volatilityDetectionZmaxNums = new TreeMap<>();//波动每5000帧Zmax
+
+
     private Map<Long, Map<Integer, Integer>> EntropyMapDay = new TreeMap<>();//熵值每天
     private Map<Integer, Map<Long, Integer>> EntropyMapDayW = new TreeMap<>();//熵值W
     private Map<Integer, Map<Long, Integer>> EntropyMapNumsW = new TreeMap<>();//熵值1500帧W
@@ -85,6 +94,9 @@ public class FrequencyStatistics {
     private Map<Long, Map<Integer, Integer>> EntropyMapNums = new TreeMap<>();//熵值每1500条
     private Map<String, Map<Integer, Integer>> EntropyMapType = new LinkedHashMap<>();//熵值充电段
     private Map<Integer, Integer> EntropyMapBatterSum = new TreeMap<>();//熵值每个单体出现总次数
+    private List<Map<Integer, Double>> EntropyZmaxMapList = new LinkedList<>();//熵值计算Zmax使用
+    private Map<Long, Map<Integer, Double>> EntropyZmaxNums = new TreeMap<>();//熵值每5000帧Zmax
+
 
     private DecimalFormat df = new DecimalFormat("0.000000000");
 
@@ -152,6 +164,7 @@ public class FrequencyStatistics {
             Map<Integer, Double> tmpSumMap = getVolatilityDetectionMapDayVSum().get(dataTime);
             if (null == tmpSumMap) tmpSumMap = new TreeMap<>();
             lists.sort((o1, o2) -> new BigDecimal(o1.get(time)).compareTo(new BigDecimal(o2.get(time))));
+            Map<Integer, Double> maxVMap = null;
             for (List<String> list : lists) {
                 if (!getType().equals(list.get(type))) continue;
                 if (list.size() < monSigama + 1) continue;
@@ -160,13 +173,20 @@ public class FrequencyStatistics {
                  */
                 String quaList = list.get(monSigama);
                 String[] s4 = quaList.split("_");
+                int maxMonNum = 0;
+                double maxZ = 0.0;
                 for (String s3 : s4) {
                     String[] split = s3.split(":");
                     if (split.length == 2) {
                         Integer smon = Integer.parseInt(split[0]);
                         String sv = split[1];
+                        if (!isNumber(sv)) sv = "0";
                         Double multiply = new BigDecimal(sv).subtract(new BigDecimal("3")).doubleValue();
                         if (multiply <= 0) continue;
+                        if (multiply > maxZ) {
+                            maxMonNum = smon;
+                            maxZ = multiply;
+                        }
                         int monNum = smon;
                         /**
                          * 每天数据
@@ -231,6 +251,9 @@ public class FrequencyStatistics {
                         }
                     }
                 }
+                maxVMap = new HashMap<>();
+                maxVMap.put(maxMonNum, maxZ);
+                getVolatilityDetectionZmaxMapList().add(maxVMap);
                 nums++;
                 /**
                  * 每1500条数据
@@ -319,6 +342,8 @@ public class FrequencyStatistics {
         doZNums(getVolatilityDetectionMapNumsZSum(), 2);
         doWNums(getVolatilityDetectionMapNums(), 2);
         doXYNums(getVolatilityDetectionMapNums(), 2);
+
+        doZmaxNums(getVolatilityDetectionZmaxMapList(), 2);
     }
 
     /**
@@ -350,6 +375,7 @@ public class FrequencyStatistics {
             Map<Integer, Double> tmpSumMap = getPressureDropConsistencyMapDayZSum().get(dataTime);
             if (null == tmpSumMap) tmpSumMap = new TreeMap<>();
             Iterator<List<String>> iterator = lists.iterator();
+            Map<Integer, Double> maxVMap = null;
             while (iterator.hasNext()) {
                 List<String> next = iterator.next();
                 int maxMon = 12;//最大值编号
@@ -358,17 +384,21 @@ public class FrequencyStatistics {
                 int allMonNums = 7;//所有单体电压值
                 int maxNums = 14;//绝对值最大压差值
                 if (next.size() < tyep + 1) continue;
+                if (!getType().equals(next.get(tyep))) continue;
 
                 /**
                  * 压差倍数差的和
                  */
-                if (StringUtils.isNotEmpty(next.get(maxNums)) && new BigDecimal(next.get(maxNums)).compareTo(new BigDecimal("2")) > 0) {
-                    double v = new BigDecimal(next.get(maxNums)).subtract(new BigDecimal("2")).doubleValue();
-
+                String s1 = next.get(maxNums);
+                if (!isNumber(s1)) s1 = "0";
+                if (StringUtils.isNotEmpty(s1) && new BigDecimal(s1).compareTo(new BigDecimal("2")) > 0) {
+                    double v = new BigDecimal(s1).subtract(new BigDecimal("2")).doubleValue();
                     List<String> list = next;
                     int monNum = getInt(list.get(maxMon));
-                    if (!getType().equals(list.get(tyep))) continue;
 
+                    maxVMap = new HashMap<>();
+                    maxVMap.put(monNum, v);
+                    getPressureDropConsistencyZMaxMapList().add(maxVMap);
                     /**
                      * 每天数据
                      */
@@ -429,6 +459,10 @@ public class FrequencyStatistics {
                         lastTime = thisTime;
                         lastEndTime = thisTime;
                     }
+                } else {
+                    maxVMap = new HashMap<>();
+                    maxVMap.put(1, 0.0);
+                    getPressureDropConsistencyZMaxMapList().add(maxVMap);
                 }
                 nums++;
                 /**
@@ -603,6 +637,8 @@ public class FrequencyStatistics {
         doZNums(getPressureDropConsistencyMapNumsZSum(), 3);
         doWNums(getPressureDropConsistencyMapNums(), 3);
         doXYNums(getPressureDropConsistencyMapNums(), 3);
+
+        doZmaxNums(getPressureDropConsistencyZMaxMapList(), 3);
     }
 
     /**
@@ -633,21 +669,26 @@ public class FrequencyStatistics {
             Map<Integer, Double> tmpSumMap = getEntropyMapDayXiShuSum().get(dataTime);
             if (null == tmpSumMap) tmpSumMap = new TreeMap<>(); //存放一天的(系数减去4)的和
             lists.sort((o1, o2) -> new BigDecimal(o1.get(2)).compareTo(new BigDecimal(o2.get(2))));
+            Map<Integer, Double> maxVMap = null;
             for (List<String> list : lists) {
                 int time = 2;//时间
                 int type = 12;//充放电状态
                 int maxMon = 8;//最大单体编号
                 int maxNums = 9;//最大熵值系数
                 int allMonNums = 10;//所有单体熵值系数
-                if (!getType().equals(list.get(type))) continue;
                 if (list.size() < type + 1) continue;
-                int monNum = Integer.parseInt(list.get(maxMon));
+                if (!getType().equals(list.get(type))) continue;
+                String s1 = list.get(maxMon);
+                if (StringUtils.isEmpty(s1)) continue;
+                int monNum = Integer.parseInt(s1);
                 if (getBatteryNum() == 0) {
                     /** 存放单体数量 */
                     setBatteryNum(list.get(allMonNums).split("_").length + getIgnoreMonNum());
                 }
 
-                if (new BigDecimal(list.get(maxNums)).compareTo(new BigDecimal("4")) > 0) {
+                String s2 = list.get(maxNums);
+                if (!isNumber(s2)) s2 = "0";
+                if (new BigDecimal(s2).compareTo(new BigDecimal("4")) > 0) {
                     /**
                      * 天数据
                      */
@@ -659,7 +700,10 @@ public class FrequencyStatistics {
                     /**
                      * 天系数差的和数据
                      */
-                    double v = new BigDecimal(list.get(maxNums)).subtract(new BigDecimal("4")).doubleValue();
+                    double v = new BigDecimal(s2).subtract(new BigDecimal("4")).doubleValue();
+                    maxVMap = new HashMap<>();
+                    maxVMap.put(monNum, v);
+                    getEntropyZmaxMapList().add(maxVMap);
                     if (tmpSumMap.containsKey(monNum)) {
                         tmpSumMap.put(monNum, tmpSumMap.get(monNum) + v);
                     } else {
@@ -708,6 +752,10 @@ public class FrequencyStatistics {
                         lastTime = thisTime;
                         lastEndTime = thisTime;
                     }
+                } else {
+                    maxVMap = new HashMap<>();
+                    maxVMap.put(1, 0.0);
+                    getEntropyZmaxMapList().add(maxVMap);
                 }
                 nums++;
                 /**
@@ -794,6 +842,98 @@ public class FrequencyStatistics {
         doZNums(getEntropyMapNumsXiShuSum(), 1);
         doWNums(getEntropyMapNums(), 1);
         doXYNums(getEntropyMapNums(), 1);
+
+        doZmaxNums(getEntropyZmaxMapList(), 1);
+    }
+
+    /**
+     * 处理Zmax
+     *
+     * @param volatilityDetectionZmaxMapList
+     * @param type
+     * @return void
+     * @author liwenjie
+     * @creed: Talk is cheap,show me the code
+     * @date 2020/7/6 3:18 下午
+     */
+    private void doZmaxNums(List<Map<Integer, Double>> volatilityDetectionZmaxMapList, int type) {
+        if (null != volatilityDetectionZmaxMapList) {
+            int size = volatilityDetectionZmaxMapList.size();
+            if (size > 0) {
+                long index = 0L;
+                if (size % getZMaxNums() == 0) {
+                    index = size / getZMaxNums();
+                } else {
+                    index = size / getZMaxNums() + 1;
+                }
+                int nums = 0;
+                Map<Integer, Double> tmpMap = new HashMap<>();
+                if (1 == type) {
+                    for (int i = size - 1; i >= 0; i--) {
+                        nums++;
+                        Map<Integer, Double> integerDoubleMap = volatilityDetectionZmaxMapList.get(i);
+                        for (Map.Entry<Integer, Double> integerDoubleEntry : integerDoubleMap.entrySet()) {
+                            Integer monNum = integerDoubleEntry.getKey();
+                            double v = integerDoubleEntry.getValue();
+                            if (tmpMap.containsKey(monNum)) {
+                                tmpMap.put(monNum, tmpMap.get(monNum) + v);
+                            } else {
+                                tmpMap.put(monNum, v);
+                            }
+                        }
+                        if (nums >= getZMaxNums()) {
+                            getEntropyZmaxNums().put(index, tmpMap);
+                            tmpMap = new HashMap<>();
+                            nums = 0;
+                            index--;
+                        }
+                    }
+                    getEntropyZmaxNums().put(index, tmpMap);
+                } else if (2 == type) {
+                    for (int i = size - 1; i >= 0; i--) {
+                        nums++;
+                        Map<Integer, Double> integerDoubleMap = volatilityDetectionZmaxMapList.get(i);
+                        for (Map.Entry<Integer, Double> integerDoubleEntry : integerDoubleMap.entrySet()) {
+                            Integer monNum = integerDoubleEntry.getKey();
+                            double v = integerDoubleEntry.getValue();
+                            if (tmpMap.containsKey(monNum)) {
+                                tmpMap.put(monNum, tmpMap.get(monNum) + v);
+                            } else {
+                                tmpMap.put(monNum, v);
+                            }
+                        }
+                        if (nums >= getZMaxNums()) {
+                            getVolatilityDetectionZmaxNums().put(index, tmpMap);
+                            tmpMap = new HashMap<>();
+                            nums = 0;
+                            index--;
+                        }
+                    }
+                    getVolatilityDetectionZmaxNums().put(index, tmpMap);
+                } else if (3 == type) {
+                    for (int i = size - 1; i >= 0; i--) {
+                        nums++;
+                        Map<Integer, Double> integerDoubleMap = volatilityDetectionZmaxMapList.get(i);
+                        for (Map.Entry<Integer, Double> integerDoubleEntry : integerDoubleMap.entrySet()) {
+                            Integer monNum = integerDoubleEntry.getKey();
+                            double v = integerDoubleEntry.getValue();
+                            if (tmpMap.containsKey(monNum)) {
+                                tmpMap.put(monNum, tmpMap.get(monNum) + v);
+                            } else {
+                                tmpMap.put(monNum, v);
+                            }
+                        }
+                        if (nums >= getZMaxNums()) {
+                            getPressureDropConsistencyZMaxNums().put(index, tmpMap);
+                            tmpMap = new HashMap<>();
+                            nums = 0;
+                            index--;
+                        }
+                    }
+                    getPressureDropConsistencyZMaxNums().put(index, tmpMap);
+                }
+            }
+        }
     }
 
     private void doZNums(Map<Long, Map<Integer, Double>> zSum, int type) {
@@ -1079,9 +1219,8 @@ public class FrequencyStatistics {
      * @return
      */
     private Long getaLongTime(String s) {
-        String[] times = s.split("/");
-        String[] s1 = times[times.length - 1].split("_");
-        String time1 = s1[1];
+        String[] times = s.split("_");
+        String time1 = times[1];
         return Long.valueOf(time1);
     }
 
@@ -1133,13 +1272,15 @@ public class FrequencyStatistics {
         ResultWriteToCsv(outPath, getVolatilityDetectionMapBatterSum(), "波动一致性故障诊断模型", getVolatilityDetectionSum());
         ResultWriteToCsvWeek(outPath, getVolatilityDetectionMapWeek(), "波动一致性故障诊断模型");
 
-        ResultWriteToCsvWeekX(outPath, getVolatilityDetectionMapWeekSum(), "波动一致性故障诊断模型_周");
-        ResultWriteToCsvWeekW(outPath, getVolatilityDetectionMapDayW(), "波动一致性故障诊断模型_日");
-        ResultWriteToCsvWeekZ(outPath, getVolatilityDetectionMapWeekZSum(), "波动一致性故障诊断模型_周");
+        ResultWriteToCsvX(outPath, getVolatilityDetectionMapWeekSum(), "波动一致性故障诊断模型_周", "X_Y");
+        ResultWriteToCsvW(outPath, getVolatilityDetectionMapDayW(), "波动一致性故障诊断模型_日", "W");
+        ResultWriteToCsvZ(outPath, getVolatilityDetectionMapWeekZSum(), "波动一致性故障诊断模型_周", "Z");
 
-        ResultWriteToCsvWeekX(outPath, getVolatilityDetectionMapNumsSum(), "波动一致性故障诊断模型_500帧");
-        ResultWriteToCsvWeekW(outPath, getVolatilityDetectionMapNumsW(), "波动一致性故障诊断模型_500帧");
-        ResultWriteToCsvWeekZ(outPath, getVolatilityDetectionMapNumsZSum(), "波动一致性故障诊断模型_500帧");
+        ResultWriteToCsvX(outPath, getVolatilityDetectionMapNumsSum(), "波动一致性故障诊断模型_500帧", "X_Y");
+        ResultWriteToCsvW(outPath, getVolatilityDetectionMapNumsW(), "波动一致性故障诊断模型_500帧", "W");
+        ResultWriteToCsvZ(outPath, getVolatilityDetectionMapNumsZSum(), "波动一致性故障诊断模型_500帧", "Z");
+
+        ResultWriteToCsvZmax(outPath, getVolatilityDetectionZmaxNums(), "波动一致性故障诊断模型_5000帧", "Zmax");
 
 
         ResultWriteToCsvType(outPath, getVolatilityDetectionMapType(), "波动一致性故障诊断模型");
@@ -1163,13 +1304,15 @@ public class FrequencyStatistics {
         ResultWriteToCsv(outPath, getPressureDropConsistencyMapBatterSum(), "压降一致性故障诊断模型", getPressureDropConsistencySum());
         ResultWriteToCsvWeek(outPath, getPressureDropConsistencyMapWeek(), "压降一致性故障诊断模型");
 
-        ResultWriteToCsvWeekX(outPath, getPressureDropConsistencyMapWeekSum(), "压降一致性故障诊断模型_周");
-        ResultWriteToCsvWeekW(outPath, getPressureDropConsistencyMapDayW(), "压降一致性故障诊断模型_日");
-        ResultWriteToCsvWeekZ(outPath, getPressureDropConsistencyMapWeekZSum(), "压降一致性故障诊断模型_周");
+        ResultWriteToCsvX(outPath, getPressureDropConsistencyMapWeekSum(), "压降一致性故障诊断模型_周", "X_Y");
+        ResultWriteToCsvW(outPath, getPressureDropConsistencyMapDayW(), "压降一致性故障诊断模型_日", "W");
+        ResultWriteToCsvZ(outPath, getPressureDropConsistencyMapWeekZSum(), "压降一致性故障诊断模型_周", "Z");
 
-        ResultWriteToCsvWeekX(outPath, getPressureDropConsistencyMapNumsSum(), "压降一致性故障诊断模型_500帧");
-        ResultWriteToCsvWeekW(outPath, getPressureDropConsistencyMapNumsW(), "压降一致性故障诊断模型_500帧");
-        ResultWriteToCsvWeekZ(outPath, getPressureDropConsistencyMapNumsZSum(), "压降一致性故障诊断模型_500帧");
+        ResultWriteToCsvX(outPath, getPressureDropConsistencyMapNumsSum(), "压降一致性故障诊断模型_500帧", "X_Y");
+        ResultWriteToCsvW(outPath, getPressureDropConsistencyMapNumsW(), "压降一致性故障诊断模型_500帧", "W");
+        ResultWriteToCsvZ(outPath, getPressureDropConsistencyMapNumsZSum(), "压降一致性故障诊断模型_500帧", "Z");
+
+        ResultWriteToCsvZmax(outPath, getPressureDropConsistencyZMaxNums(), "压降一致性故障诊断模型_5000帧", "Zmax");
 
         ResultWriteToCsvType(outPath, getPressureDropConsistencyMapType(), "压降一致性故障诊断模型");
 
@@ -1196,15 +1339,71 @@ public class FrequencyStatistics {
         if (null == entropyMapWeekXiShuSum || entropyMapWeekXiShuSum.size() == 0) return;
         BaseWriteToCSVXiShu(outPath, entropyMapWeekXiShuSum, "熵值故障诊断模型", "周");
 //
-        ResultWriteToCsvWeekX(outPath, getEntropyMapWeekSum(), "熵值故障诊断模型_周");
-        ResultWriteToCsvWeekW(outPath, getEntropyMapDayW(), "熵值故障诊断模型_日");
-        ResultWriteToCsvWeekZ(outPath, getEntropyMapWeekXiShuSum(), "熵值故障诊断模型_周");
+        ResultWriteToCsvX(outPath, getEntropyMapWeekSum(), "熵值故障诊断模型_周", "X_Y");
+        ResultWriteToCsvW(outPath, getEntropyMapDayW(), "熵值故障诊断模型_日", "W");
+        ResultWriteToCsvZ(outPath, getEntropyMapWeekXiShuSum(), "熵值故障诊断模型_周", "Z");
 
-        ResultWriteToCsvWeekX(outPath, getEntropyMapNumsSum(), "熵值故障诊断模型_500帧");
-        ResultWriteToCsvWeekW(outPath, getEntropyMapNumsW(), "熵值故障诊断模型_500帧");
-        ResultWriteToCsvWeekZ(outPath, getEntropyMapNumsXiShuSum(), "熵值故障诊断模型_500帧");
+        ResultWriteToCsvX(outPath, getEntropyMapNumsSum(), "熵值故障诊断模型_500帧", "X_Y");
+        ResultWriteToCsvW(outPath, getEntropyMapNumsW(), "熵值故障诊断模型_500帧", "W");
+        ResultWriteToCsvZ(outPath, getEntropyMapNumsXiShuSum(), "熵值故障诊断模型_500帧", "Z");
+
+        ResultWriteToCsvZmax(outPath, getEntropyZmaxNums(), "熵值故障诊断模型_5000帧", "Zmax");
 
         ResultWriteToCsvType(outPath, getEntropyMapType(), "熵值故障诊断模型");
+    }
+
+    /**
+     * Zmax 结果输出
+     *
+     * @param filename
+     * @param entropyZmaxNums
+     * @param s               熵值故障诊断模型_5000帧
+     * @param s1              zmax
+     * @return void
+     * @author liwenjie
+     * @creed: Talk is cheap,show me the code
+     * @date 2020/7/6 7:42 下午
+     */
+    private void ResultWriteToCsvZmax(String filename, Map<Long, Map<Integer, Double>> entropyZmaxNums, String s, String s1) {
+        Set<Long> longs = entropyZmaxNums.keySet();
+        //写表头
+        StringBuffer title = new StringBuffer(1000);
+        title.append("单体编号");
+        for (Long aLong : longs) {
+            title.append("," + aLong);
+        }
+        OutputStreamWriter ow = null;
+        BufferedWriter bw = null;
+        try {
+            if ("2".equals(getType())) {
+                filename = filename + "/0_" + getVIN() + "__" + s + "-" + s1 + "-放电.csv";
+            } else {
+                filename = filename + "/0_" + getVIN() + "__" + s + "-" + s1 + "-充电.csv";
+            }
+            ow = new OutputStreamWriter(new FileOutputStream(new File(filename)), encode);
+            bw = new BufferedWriter(ow);
+            bw.write(title.toString()); //中间，隔开不同的单元格，一次写一行
+            bw.newLine();
+
+            for (int i = 0; i < getBatteryNum(); i++) {
+                StringBuffer content = new StringBuffer(1000);
+                content.append(i + 1);
+                for (Long aLong : longs) {
+                    content.append("," + getNum(entropyZmaxNums.get(aLong).get(i + 1)));
+                }
+                bw.write(content.toString());
+                bw.newLine();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (null != bw) bw.close();
+                if (null != ow) ow.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -1400,14 +1599,14 @@ public class FrequencyStatistics {
      * @param
      * @param s
      */
-    private void ResultWriteToCsvWeekX(String filename, Map<Long, Integer> sumMap, String s) {
+    private void ResultWriteToCsvX(String filename, Map<Long, Integer> sumMap, String s, String s1) {
         OutputStreamWriter ow = null;
         BufferedWriter bw = null;
         try {
             if ("2".equals(getType())) {
-                filename = filename + "/0_" + getVIN() + "__" + s + "-X_Y-放电.csv";
+                filename = filename + "/0_" + getVIN() + "__" + s + "-" + s1 + "-放电.csv";
             } else {
-                filename = filename + "/0_" + getVIN() + "__" + s + "-X_Y-充电.csv";
+                filename = filename + "/0_" + getVIN() + "__" + s + "-" + s1 + "-充电.csv";
             }
             ow = new OutputStreamWriter(new FileOutputStream(new File(filename), true), encode);
             bw = new BufferedWriter(ow);
@@ -1453,14 +1652,14 @@ public class FrequencyStatistics {
      * @param
      * @param s
      */
-    private void ResultWriteToCsvWeekW(String filename, Map<Integer, Map<Long, Integer>> sumMap, String s) {
+    private void ResultWriteToCsvW(String filename, Map<Integer, Map<Long, Integer>> sumMap, String s, String s1) {
         OutputStreamWriter ow = null;
         BufferedWriter bw = null;
         try {
             if ("2".equals(getType())) {
-                filename = filename + "/0_" + getVIN() + "__" + s + "-W-放电.csv";
+                filename = filename + "/0_" + getVIN() + "__" + s + "-" + s1 + "-放电.csv";
             } else {
-                filename = filename + "/0_" + getVIN() + "__" + s + "-W-充电.csv";
+                filename = filename + "/0_" + getVIN() + "__" + s + "-" + s1 + "-充电.csv";
             }
             ow = new OutputStreamWriter(new FileOutputStream(new File(filename), true), encode);
             bw = new BufferedWriter(ow);
@@ -1509,14 +1708,14 @@ public class FrequencyStatistics {
      * @author liwenjie
      * @date 2020/6/5 9:00
      */
-    private void ResultWriteToCsvWeekZ(String filename, Map<Long, Map<Integer, Double>> pressureDropConsistencyMapWeek, String s) {
+    private void ResultWriteToCsvZ(String filename, Map<Long, Map<Integer, Double>> pressureDropConsistencyMapWeek, String s, String s1) {
         OutputStreamWriter ow = null;
         BufferedWriter bw = null;
         try {
             if ("2".equals(getType())) {
-                filename = filename + "/0_" + getVIN() + "__" + s + "-Z-放电.csv";
+                filename = filename + "/0_" + getVIN() + "__" + s + "-" + s1 + "-放电.csv";
             } else {
-                filename = filename + "/0_" + getVIN() + "__" + s + "-Z-充电.csv";
+                filename = filename + "/0_" + getVIN() + "__" + s + "-" + s1 + "-充电.csv";
             }
             ow = new OutputStreamWriter(new FileOutputStream(new File(filename), true), encode);
             bw = new BufferedWriter(ow);
@@ -1799,6 +1998,16 @@ public class FrequencyStatistics {
         return resultList;
     }
 
+    private boolean isNumber(String str) {
+        if (StringUtils.isEmpty(str)) return false;
+        for (int i = str.length(); --i >= 0; ) {
+            if (str.charAt(i) != '.' && !Character.isDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private String getNum(Integer integer) {
         return null == integer ? "0" : integer.toString();
     }
@@ -1825,15 +2034,26 @@ public class FrequencyStatistics {
      *
      * @param
      */
-    /*public static void zipBefore(String outputPath) {
+   /* public static void zipBefore(String outputPath) {
         logger.info("开始处理结果文件");
         Map<String, FrequencyStatistics> map = new HashMap<>();
         //读取所有的文件路径
         ArrayList<String> strings = ScanPackage.scanFilesWithRecursion(outputPath);
+        Collections.sort(strings, (o1, o2) -> {
+            o1 = o1.replaceAll("\\\\", "/");
+            o2 = o2.replaceAll("\\\\", "/");
+            String[] s = o1.split("/");
+            String[] s1 = s[s.length - 1].split("_");
+            String[] s3 = o2.split("/");
+            String[] s4 = s3[s.length - 1].split("_");
+            return Integer.parseInt(s1[1]) - Integer.parseInt(s4[1]);
+        });
         for (String string : strings) {
+            string = string.replaceAll("\\\\", "/");
             if (!string.endsWith(".csv")) continue;
-            String[] s = string.split("_");
-            String vin = s[0].substring(s[0].length() - 17);
+            String[] s = string.split("/");
+            String[] s1 = s[s.length - 1].split("_");
+            String vin = s1[0].substring(s1[0].length() - 17);
             if (map.containsKey(vin)) {
                 if (string.contains("压降一致性故障诊断模型")) {
                     map.get(vin).getPressureDropConsistencyList().add(string);
@@ -1862,6 +2082,10 @@ public class FrequencyStatistics {
             Integer integer = ConfigerIgnoreTheMonomer.getMonomerTotal().get(stringFrequencyStatisticsEntry.getKey());
             if (null == integer) integer = 0;
             stringFrequencyStatisticsEntry.getValue().setBatteryNum(integer);
+            stringFrequencyStatisticsEntry.getValue().setZMaxNums(Constant.zMaxNums);
+            stringFrequencyStatisticsEntry.getValue().setPressureNums(Constant.PRESSURENUMS);
+            stringFrequencyStatisticsEntry.getValue().setEntropyNums(Constant.ENTROPYNUMS);
+            stringFrequencyStatisticsEntry.getValue().setVolatilityNums(Constant.VOLATILITYNUMS);
             logger.info("放电");
             logger.info("开始处理压降一致性文件");
             stringFrequencyStatisticsEntry.getValue().doPressureDropConsistencyDayAndNums();
@@ -1889,6 +2113,10 @@ public class FrequencyStatistics {
             Integer integer = ConfigerIgnoreTheMonomer.getMonomerTotal().get(stringFrequencyStatisticsEntry.getKey());
             if (null == integer) integer = 0;
             stringFrequencyStatisticsEntry.getValue().setBatteryNum(integer);
+            stringFrequencyStatisticsEntry.getValue().setZMaxNums(Constant.zMaxNums);
+            stringFrequencyStatisticsEntry.getValue().setPressureNums(Constant.PRESSURENUMS);
+            stringFrequencyStatisticsEntry.getValue().setEntropyNums(Constant.ENTROPYNUMS);
+            stringFrequencyStatisticsEntry.getValue().setVolatilityNums(Constant.VOLATILITYNUMS);
             logger.info("充电");
             logger.info("开始处理压降一致性文件");
             stringFrequencyStatisticsEntry.getValue().doPressureDropConsistencyDayAndNums();
@@ -1911,8 +2139,7 @@ public class FrequencyStatistics {
             stringFrequencyStatisticsEntry.getValue().outIcon(outputPath);
         }
         logger.info("-----------------------结束-------------------------------");
-    }
-    */
+    }*/
     public static Map<String, FrequencyStatistics> mapCopy(Map<String, FrequencyStatistics> map) {
         Map<String, FrequencyStatistics> resultMap = new HashMap<>();
         for (Map.Entry<String, FrequencyStatistics> stringFrequencyStatisticsEntry : map.entrySet()) {
@@ -1921,4 +2148,7 @@ public class FrequencyStatistics {
         return resultMap;
     }
 
+    public static void main(String[] args) {
+        System.out.println(new FrequencyStatistics().isNumber("?"));
+    }
 }
