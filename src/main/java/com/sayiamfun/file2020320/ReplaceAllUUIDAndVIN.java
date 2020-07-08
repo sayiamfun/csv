@@ -10,13 +10,13 @@ import java.util.List;
 public class ReplaceAllUUIDAndVIN {
 
     private static String vin = "L66BBC4E8H1GT0484";
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         String path = "D:\\车辆数据\\格力数据\\交付数据\\20200325171708\\";
         String outPath = "D:\\车辆数据\\格力数据\\交付数据\\result\\";
         replace(path,outPath);
     }
 
-    public static void replace(String path,String outPath){
+    public static void replace(String path,String outPath) throws FileNotFoundException {
         ArrayList<String> strings = ScanPackage.scanFiles(path);
 
         //csv文件读取方法

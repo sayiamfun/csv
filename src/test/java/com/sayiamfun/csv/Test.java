@@ -3,6 +3,10 @@ package com.sayiamfun.csv;
 
 import com.sayiamfun.common.utils.ScanPackage;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
 import java.util.*;
@@ -11,44 +15,64 @@ public class Test {
 
     public static void main(String[] args) {
 
-        String[] split = "/data/veh_90_2/LB378Y4W3JA183111/part-00000-9d2a9dc5-62ca-40db-a727-ba3f7bc7c097.c000.csv".split("/");
-        System.out.println(split[split.length-2]);
+        InputStream is = null;// 输入流对象
+        XSSFWorkbook workbook = null;
+
+        OutputStreamWriter ow = null;
+        BufferedWriter bw = null;
+        try {
+
+            ow = new OutputStreamWriter(new FileOutputStream(new File("D:\\文档资料\\车辆数据\\20191106\\力帆数据包\\out\\test.csv"),true),ScanPackage.encode);
+            bw = new BufferedWriter(ow);
+
+            String cellStr = null;// 单元格，最终按字符串处理
+            is = new FileInputStream(new File(""));// 获取文件输入流
+            workbook = new XSSFWorkbook(is);// 创建Excel文件对象
+            XSSFSheet sheet = workbook.getSheetAt(0);// 取出第一个工作表，索引是0
+            // 开始循环遍历行，表头不处理，从1开始
+            for (int i = 2; i <= sheet.getLastRowNum(); i++) {
+                XSSFRow row = sheet.getRow(i);// 获取行对象
+                if (row == null) {// 如果为空，不处理
+                    continue;
+                }
+                // 循环遍历单元格
+                List<String> childrenList = new LinkedList<>();
+                for (int j = 0; j < row.getLastCellNum(); j++) {
+                    XSSFCell cell = row.getCell(j);// 获取单元格对象
+                    if (cell == null) {// 单元格为空设置cellStr为空串
+                        cellStr = "";
+                    } else {
+                        try {
+                            cellStr = cell.getStringCellValue(); //如果是字符串，按照字符串处理
+                        } catch (Exception e) {
+                            cellStr = "" + cell.getNumericCellValue(); //报异常安装数字处理  暂时没有找到判断方法
+                        }
+                    }
+                    childrenList.add(cellStr);
+                }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {// 关闭文件流
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (workbook != null) {
+                try {
+                    workbook.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
 
-//        String tmp = "4.063_4.059_4.06_4.06_4.061_4.059_4.06_4.061_4.062_4.06_4.061_4.041_4.061_4.061_4.061_4.061_4.062_4.062_4.06_4.061_4.059_4.06_4.059_4.061_4.059_4.062_4.06_4.059_4.061_4.061_4.063_4.061_4.061_4.061_4.062_4.06_4.062_4.059_4.062_4.063_4.063_4.063_4.061_4.06_4.062_4.06_4.062_4.061_4.062_4.061_4.061_4.062_4.063_4.061_4.062_4.061_4.059_4.062_4.06_4.062_4.06_4.064_4.061_4.062_4.058_4.06_4.062_4.059_4.06_4.06_4.06_4.059_4.062_4.064_4.062_4.062_4.061_4.064_4.061_4.062_4.06_4.061_4.06_4.06_4.06_4.061\n";
-//        String[] s = tmp.split("_");
-//        System.out.println(s.length);
-//        for (String s1 : s) {
-//            System.out.println(s1);
-//        }
 
-//        String s = "D:\\车辆数据\\传为佳话\\2020-03-25.tar\\2020-03-25\\backup_data\\year=2019\\month=09\\day=08\\vin=LEWTEB140HE103804\\part-00000-661197f6-6c8b-4828-ae18-9f53a5b8a3d9.c000.csv";
-//        int year = s.indexOf("year=");
-//        int month = s.indexOf("month=");
-//        int day = s.indexOf("day=");
-//        int vin = s.indexOf("vin=");
-//        String years = s.substring(year + 5, year + 9);
-//        String months = s.substring(month + 6, month + 8);
-//        String days = s.substring(day + 4, day + 6);
-//        String vins = s.substring(vin + 4, vin + 4 + "LEWTEB140HE103804".length());
-//        System.out.println(vins + "_" + years + months + days);
-
-
-//        String[] split = s.split(":");
-//        String[] split1 = split[2].split("]");
-//        int mSize = Integer.parseInt(StringUtils.substring(split1[0], 1, split1[0].length()));//温度探针数量
-//        String tmpV = StringUtils.substring(split[3], 1); //第一个单体电压
-//        System.out.println(mSize + " " + tmpV);
-
-
-//        Test test = new Test();
-//        List<List<Integer>> lists = test.threeSum(new int[]{0, 0, 0, 0});
-//        for (List<Integer> list : lists) {
-//            for (Integer integer : list) {
-//                System.out.print(integer + ",");
-//            }
-//            System.out.println();
-//        }
     }
 
     private static String getTime(String s) {

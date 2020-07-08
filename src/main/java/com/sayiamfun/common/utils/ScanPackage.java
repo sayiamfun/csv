@@ -1,9 +1,12 @@
 package com.sayiamfun.common.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
@@ -14,6 +17,8 @@ import java.util.*;
  * @describe
  */
 public class ScanPackage {
+
+    private static Logger logger = LoggerFactory.getLogger(ScanPackage.class);
 
     private static ArrayList<String> scanFiles = new ArrayList<>();
     private static int count = 0;
@@ -64,20 +69,20 @@ public class ScanPackage {
                 }
                 return resultList;
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             } finally {// 关闭文件流
                 if (is != null) {
                     try {
                         is.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.error(e.getMessage(), e);
                     }
                 }
                 if (workbook != null) {
                     try {
                         workbook.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.error(e.getMessage(), e);
                     }
                 }
             }
@@ -106,7 +111,7 @@ public class ScanPackage {
             }
             bw.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -145,7 +150,7 @@ public class ScanPackage {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return resultList;
     }
@@ -165,7 +170,7 @@ public class ScanPackage {
                 resultList.add(item);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return resultList;
     }
@@ -185,7 +190,7 @@ public class ScanPackage {
                 resultList.add(Arrays.asList(item));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return resultList;
     }
@@ -220,50 +225,99 @@ public class ScanPackage {
                 }
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return scanFiles;
     }
 
     public static ArrayList<String> scanFiles(String folderPath) {
         ArrayList<String> scanFiles = new ArrayList<>();
-        try {
-            File directory = new File(folderPath);
-            if (!directory.isDirectory()) {
+        File directory = new File(folderPath);
+        if (!directory.isDirectory()) {
+            try {
                 throw new FileNotFoundException('"' + folderPath + '"' + " input path is not a Directory , please input the right path of the Directory. ^_^...^_^");
+            } catch (FileNotFoundException e) {
+                logger.error(e.getMessage(), e);
             }
-            if (directory.isDirectory()) {
-                File[] filelist = directory.listFiles();
-                for (int i = 0; i < filelist.length; i++) {
-                    /**如果当前是文件夹，进入递归扫描文件夹**/
-                    if (filelist[i].isDirectory()) {
-                        /**递归扫描下面的文件夹**/
-                        ArrayList<String> strings = scanFiles(filelist[i].getAbsolutePath());
-                        for (String string : strings) {
-                            if (!scanFiles.contains(string)) {
-                                scanFiles.add(string);
-                            }
-                        }
-                    }
-                    /**非文件夹**/
-                    else {
-                        if (!scanFiles.contains(filelist[i].getAbsolutePath())) {
-                            scanFiles.add(filelist[i].getAbsolutePath());
+        }
+        if (directory.isDirectory()) {
+            File[] filelist = directory.listFiles();
+            for (int i = 0; i < filelist.length; i++) {
+                /**如果当前是文件夹，进入递归扫描文件夹**/
+                if (filelist[i].isDirectory()) {
+                    /**递归扫描下面的文件夹**/
+                    ArrayList<String> strings = scanFiles(filelist[i].getAbsolutePath());
+                    for (String string : strings) {
+                        if (!scanFiles.contains(string)) {
+                            scanFiles.add(string);
                         }
                     }
                 }
+                /**非文件夹**/
+                else {
+                    if (!scanFiles.contains(filelist[i].getAbsolutePath())) {
+                        scanFiles.add(filelist[i].getAbsolutePath());
+                    }
+                }
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
         return scanFiles;
     }
 
+    /**
+     * 获取所有文件的上层目录
+     *
+     * @param folderPath
+     * @return java.util.Set<java.lang.String>
+     * @author liwenjie
+     * @creed: Talk is cheap,show me the code
+     * @date 2020/7/7 3:32 下午
+     */
+    public static Set<String> scanDirectory(String folderPath) {
+        Set<String> directorySet = new HashSet<>();
+        ArrayList<String> strings = scanFiles(folderPath);
+        for (String string : strings) {
+            string = string.replaceAll("\\\\", "/");
+            directorySet.add(StringUtils.substring(string, 0, string.lastIndexOf("/") + 1));
+        }
+        return directorySet;
+    }
+
+    /**
+     * 获取此目录下的文件
+     *
+     * @param folderPath
+     * @return java.util.Set<java.lang.String>
+     * @author liwenjie
+     * @creed: Talk is cheap,show me the code
+     * @date 2020/7/7 3:32 下午
+     */
+    public static Set<String> scanThisDirectoryFile(String folderPath) throws FileNotFoundException {
+        Set<String> fileSet = new HashSet<>();
+        File file = new File(folderPath);
+        if (!file.isDirectory()) {
+            throw new FileNotFoundException('"' + folderPath + '"' + " input path is not a Directory , please input the right path of the Directory. ^_^...^_^");
+        }
+        File[] files = file.listFiles();
+        for (File file1 : files) {
+            if (file1.isFile()) {
+                fileSet.add(file1.getAbsolutePath());
+            }
+        }
+        return fileSet;
+    }
+
+
     public static Map<String, ArrayList<String>> fileMap = new HashMap<>();
 
 
-    public static void main(String[] args) {
-        ArrayList<String> strings = scanFiles("/Users/liwenjie/fsdownload/103_veh_9/20200619193037/");
-        strings.forEach(System.out::println);
+    public static void main(String[] args) throws FileNotFoundException {
+        Set<String> strings = scanDirectory("/Users/liwenjie/Downloads/vehData/");
+        for (String string : strings) {
+            System.out.println("-------" + string);
+            Set<String> strings1 = scanThisDirectoryFile(string);
+            strings1.forEach(System.out::println);
+        }
+
     }
 }
