@@ -1,7 +1,7 @@
 package com.sayiamfun.csv;
 
-import com.sayiamfun.csv.utils.EntropyDo;
 import com.sayiamfun.common.utils.ScanPackage;
+import com.sayiamfun.csv.utils.EntropyDo;
 
 import java.text.DecimalFormat;
 import java.util.*;

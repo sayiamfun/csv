@@ -1,6 +1,5 @@
 package com.sayiamfun.csv.utils;
 
-import com.sayiamfun.csv.entity.BatteryMonomer;
 import com.sayiamfun.csv.entity.Pressure;
 import com.sayiamfun.csv.entity.ThreeValue;
 

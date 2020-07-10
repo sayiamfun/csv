@@ -1,11 +1,11 @@
 package com.sayiamfun.csv;
 
+import com.sayiamfun.common.utils.ScanPackage;
 import com.sayiamfun.csv.entity.Pressure;
 import com.sayiamfun.csv.entity.ThreeValue;
 import com.sayiamfun.csv.entity.ValueEntity;
 import com.sayiamfun.csv.utils.Outs;
 import com.sayiamfun.csv.utils.PressureDropConsistency;
-import com.sayiamfun.common.utils.ScanPackage;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -8,11 +8,8 @@ package com.sayiamfun.common;
 //import org.apache.log4j.Logger;
 //import org.apache.poi.ss.formula.functions.T;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.*;
 
+
 /**
  * @author liwenjie
  * @date 2019/10/9 + 15:48
@@ -292,11 +293,15 @@ public class ScanPackage {
      * @creed: Talk is cheap,show me the code
      * @date 2020/7/7 3:32 下午
      */
-    public static Set<String> scanThisDirectoryFile(String folderPath) throws FileNotFoundException {
+    public static Set<String> scanThisDirectoryFile(String folderPath) {
         Set<String> fileSet = new HashSet<>();
         File file = new File(folderPath);
         if (!file.isDirectory()) {
-            throw new FileNotFoundException('"' + folderPath + '"' + " input path is not a Directory , please input the right path of the Directory. ^_^...^_^");
+            try {
+                throw new FileNotFoundException('"' + folderPath + '"' + " input path is not a Directory , please input the right path of the Directory. ^_^...^_^");
+            } catch (FileNotFoundException e) {
+                logger.error(e.getMessage(), e);
+            }
         }
         File[] files = file.listFiles();
         for (File file1 : files) {
@@ -308,16 +313,89 @@ public class ScanPackage {
     }
 
 
-    public static Map<String, ArrayList<String>> fileMap = new HashMap<>();
-
-
-    public static void main(String[] args) throws FileNotFoundException {
-        Set<String> strings = scanDirectory("/Users/liwenjie/Downloads/vehData/");
-        for (String string : strings) {
-            System.out.println("-------" + string);
-            Set<String> strings1 = scanThisDirectoryFile(string);
-            strings1.forEach(System.out::println);
+    /***
+     * 返回数据类型  Map<time,List<列>>
+     * @param filePath
+     * @param totalSum
+     * @return
+     */
+    public static Map<Long, List<String>> getMapItems1(String filePath, int type, int totalSum) {
+        Map<Long, List<String>> resultMap = new HashMap<>();
+        int count = getCount(filePath);
+        int start = 0;
+        if (count > totalSum) start = count - totalSum;
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)));//到读取的文件
+            String line = null;
+            boolean b = true;
+            int i = 0;
+            while ((line = reader.readLine()) != null) {
+                if (b) {
+                    b = false;
+                    continue;
+                }
+                i++;
+                if (i < start) continue;
+                String item[] = line.split(",");//CSV格式文件为逗号分隔符文件，这里根据逗号切分
+                if (1 == type) {
+                    resultMap.put(Long.valueOf(item[1]), Arrays.asList(item));
+                } else {
+                    resultMap.put(Long.valueOf(getExcelLongTime(item[1])), Arrays.asList(item));
+                }
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
         }
+        return resultMap;
+    }
 
+    private static int getCount(String filePath) {
+        int count = 0;
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)));//到读取的文件
+            String line = null;
+            boolean b = true;
+            while ((line = reader.readLine()) != null) {
+                count++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
+    /**
+     * 2020/6/12 7:48:00
+     *
+     * @param s
+     * @return
+     */
+    private static String getExcelLongTime(String s) {
+        String[] s1 = s.split(" ");
+        String[] split = s1[0].split("-");
+        StringBuffer stringBuffer = new StringBuffer(100);
+        for (int i = 0; i < split.length; i++) {
+            if (i == 0) {
+                stringBuffer.append(split[i]);
+            } else {
+                if (split[i].length() < 2) {
+                    stringBuffer.append("0").append(split[i]);
+                } else {
+                    stringBuffer.append(split[i]);
+                }
+            }
+        }
+        String[] split1 = s1[1].split(":");
+        for (String s2 : split1) {
+            if (s2.length() < 2) {
+                stringBuffer.append("0").append(s2);
+            } else {
+                stringBuffer.append(s2);
+            }
+        }
+        if (split1.length < 3) {
+            stringBuffer.append("00");
+        }
+        return stringBuffer.toString();
     }
 }

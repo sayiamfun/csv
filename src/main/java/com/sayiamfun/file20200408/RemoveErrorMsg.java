@@ -1,13 +1,8 @@
 package com.sayiamfun.file20200408;
 
 import com.sayiamfun.common.utils.ScanPackage;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 public class RemoveErrorMsg {
 

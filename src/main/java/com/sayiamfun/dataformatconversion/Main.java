@@ -1,14 +1,7 @@
 package com.sayiamfun.dataformatconversion;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.sayiamfun.common.utils.FileReadOrWriteUtil;
 import com.sayiamfun.common.utils.ScanPackage;
-
 
 import java.io.*;
 import java.text.SimpleDateFormat;

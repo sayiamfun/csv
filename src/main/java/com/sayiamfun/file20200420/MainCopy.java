@@ -1,9 +1,6 @@
 package com.sayiamfun.file20200420;
 
-import com.sayiamfun.StatisticalAnalysisOfResults.FrequencyStatistics;
 import com.sayiamfun.common.utils.ScanPackage;
-import org.codehaus.jackson.JsonEncoding;
-import org.codehaus.jackson.map.util.JSONPObject;
 
 import java.io.*;
 import java.math.BigDecimal;

@@ -4,8 +4,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kudu.client.*;
 import org.apache.kudu.client.SessionConfiguration.FlushMode;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -27,22 +25,22 @@ public class KuduOperUtil {
 		List<String> masters = new LinkedList<String>();
 //		this.masterList = ConfigLoader.syscfg.getProperty("apache.kudu.master").trim();
 		if (null != masterList) {
-			
+
 			this.client = getNewClient();
 		}
 	}
-	
+
 	static KuduClient getClient(){
-		
+
 		if (null != client ) {
 			return client;
 		}
 		KuduClient client = getNewClient();
 		return client;
 	}
-	
+
 	static KuduClient getNewClient(){
-		
+
 		if (null != masterList) {
 			String [] masterArr = masterList.split(",");
 			int len = masterArr.length;
@@ -65,22 +63,22 @@ public class KuduOperUtil {
 //		this.client = client;
 		return null;
 	}
-	
+
 	void createTab(){
 //		ColumnSchema schema = null;
 	}
-	
+
 	public static void insert(String name,List<Object[]> params,String [] columnNames) {
 		KuduClient client = null;
 		KuduSession session = null;
-		
+
 		try {
 			if (!StringUtils.isEmpty(name)
-					&& null != params 
+					&& null != params
 					&& params.size() > 0
 					&& null != columnNames
 					&& columnNames.length > 0) {
-				
+
 				//name = "impala::default."+name;
 				KuduTable table = null;
 				try {
@@ -99,26 +97,26 @@ public class KuduOperUtil {
 				if (null == client) {
 					return ;
 				}
-				
+
 				session = client.newSession();
 				session.setFlushMode(FlushMode.MANUAL_FLUSH);
 				int fieldLen = columnNames.length;
 				int count = 0;
-				
+
 				for (Object[] objects : params) {
-					
+
 					if (null != objects ) {
-						
+
 						int len = objects.length;
-						
+
 						if (len >= fieldLen) {
-							
+
 							count++;
 							Insert insert = table.newInsert();
 							PartialRow row = insert.getRow();
-							
+
 							for (int i = 0; i < fieldLen; i++) {
-								
+
 								Object value = objects[i];
 								if (value instanceof Integer) {
 									row.addInt(columnNames[i], (int)value);
@@ -134,15 +132,15 @@ public class KuduOperUtil {
 							}
                             System.out.println("insert--"+insert.toString());
 							session.apply(insert);
-							
+
 							if (0 == count%200) {
 								session.flush();
 							}
 						}
-						
+
 					}
 				}
-				
+
 				session.flush();
 			}
 		} catch (Exception e) {
@@ -156,9 +154,9 @@ public class KuduOperUtil {
 				}
 			}
 		}
-		
+
 	}
-	
+
 //	public static void insert(String tabname,BlockingQueue<Object[]> params,String [] columnNames) {
 //
 //		KuduClient client = null;
@@ -243,14 +241,14 @@ public class KuduOperUtil {
 //		}
 //
 //	}
-	
+
 	public static void update(String name,List<Object[]> params,String [] columnNames) {
 		KuduClient client = null;
 		KuduSession session = null;
-		
+
 		try {
 			if (! StringUtils.isEmpty(name)
-					&& null != params 
+					&& null != params
 					&& params.size() > 0
 					&& null != columnNames
 					&& columnNames.length > 0) {
@@ -272,26 +270,26 @@ public class KuduOperUtil {
 				if (null == client) {
 					return ;
 				}
-				
+
 				session = client.newSession();
 				session.setFlushMode(FlushMode.MANUAL_FLUSH);
 				int fieldLen = columnNames.length;
 				int count = 0;
-				
+
 				for (Object[] objects : params) {
-					
+
 					if (null != objects ) {
-						
+
 						int len = objects.length;
-						
+
 						if (len >= fieldLen) {
-							
+
 							count++;
 							Update update = table.newUpdate();
 							PartialRow row = update.getRow();
-							
+
 							for (int i = 0; i < fieldLen; i++) {
-								
+
 								Object value = objects[i];
 								if (value instanceof Integer) {
 									row.addInt(columnNames[i], (int)value);
@@ -307,15 +305,15 @@ public class KuduOperUtil {
 							}
 //                            System.out.println("update--"+update.toString());
 							session.apply(update);
-							
+
 							if (0 == count%100) {
 								session.flush();
 							}
 						}
-						
+
 					}
 				}
-				
+
 				session.flush();
 			}
 		} catch (Exception e) {
@@ -329,7 +327,7 @@ public class KuduOperUtil {
 				}
 			}
 		}
-		
+
 	}
 
 //	public static void main(String[] args) {

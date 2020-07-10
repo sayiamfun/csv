@@ -2,7 +2,6 @@ package com.sayiamfun.file20200327;
 
 import com.sayiamfun.common.utils.ScanPackage;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 
 import java.io.*;
 import java.util.ArrayList;
