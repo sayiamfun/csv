@@ -35,6 +35,7 @@ public class FrequencyStatistics {
     private int zMaxNums = 5000;//Zmax每多少帧统计一次 所有模型
     private int BatteryNum = 0;
     private int IgnoreMonNum = 0;
+    private Long needTime = 20190401L;
     private String VIN;
     private String nowTime;
     private List<String> volatilityDetectionList = new LinkedList<>();//波动性
@@ -155,6 +156,7 @@ public class FrequencyStatistics {
             int time = 3;//时间
             //获取时间
             Long dataTime = getaLongTime(s);
+            if (dataTime < needTime) continue;
             setStartTime(dataTime);
             //读取文件内容
             List<List<String>> lists = ReadToList(s);
@@ -366,6 +368,7 @@ public class FrequencyStatistics {
             if (!s.contains("_压降一致性故障诊断模型")) continue;
             //获取时间
             Long dataTime = getaLongTime(s);
+            if (dataTime < needTime) continue;
             setStartTime(dataTime);
             //读取文件内容
             List<List<String>> lists = ReadToList(s);
@@ -660,6 +663,7 @@ public class FrequencyStatistics {
             if (!s.contains("_熵值故障诊断模型")) continue;
             //获取时间
             Long dataTime = getaLongTime(s);
+            if (dataTime < needTime) continue;
             setStartTime(dataTime);
             //读取文件内容
             List<List<String>> lists = ReadToList(s);
@@ -1218,7 +1222,8 @@ public class FrequencyStatistics {
      * @return
      */
     private Long getaLongTime(String s) {
-        String[] times = s.split("_");
+        String[] split = s.split("/");
+        String[] times = split[split.length - 1].split("_");
         String time1 = times[1];
         return Long.valueOf(time1);
     }

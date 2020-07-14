@@ -12,20 +12,27 @@ import java.util.*;
 public class TestFrequencyStatistics {
 
 
-    static String inpath = "/Users/liwenjie/Downloads/20200707221233/";
-    static String outPath = inpath + "out/";
+    static String inpath = "/Users/liwenjie/Downloads/cpfile/cpfile04/LHWCG64DXJ1181459/20200708181850/";
+
+    static Long needTime = 20190401L;
 
     public static void main(String[] args) {
-        test();
+
+        //读取所有的文件路径
+        Set<String> strings1 = ScanPackage.scanDirectory(inpath);
+        for (String s : strings1) {
+            test(s);
+        }
     }
 
-    private static void test() {
+    private static void test(String inputPath) {
+        if (!inputPath.endsWith("/")) inputPath += "/";
+        String outPath = inputPath + "out/";
         if (!new File(outPath).exists()) {
             new File(outPath).mkdir();
         }
         Map<String, FrequencyStatistics> map = new HashMap<>();
-        //读取所有的文件路径
-        ArrayList<String> strings = ScanPackage.scanFilesWithRecursion(inpath);
+        ArrayList<String> strings = ScanPackage.scanFilesWithRecursion(inputPath);
         Collections.sort(strings, new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
@@ -52,6 +59,7 @@ public class TestFrequencyStatistics {
             } else {
                 FrequencyStatistics frequencyStatistics = new FrequencyStatistics();
                 frequencyStatistics.setVIN(vin);
+                frequencyStatistics.setNeedTime(needTime);
                 if (string.contains("压降一致性故障诊断模型")) {
                     frequencyStatistics.getPressureDropConsistencyList().add(string);
                 } else if (string.contains("波动一致性故障诊断模型")) {

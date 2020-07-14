@@ -20,7 +20,7 @@ public class XDocUtil {
      * @param outPath  输出文件路径
      */
     public static void outLine(String data, String template, String outPath) {
-        XDocService xdocService = new XDocService("http://free.xdocin.com", "xsjf5zkfmrd6vcegvgt4trpe2u");
+        XDocService xdocService = new XDocService("http://www.xdocin.com", "mdhk564m5vgh3pfw2vuq7na6pi");
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("公司", data);
         try {

@@ -212,15 +212,17 @@ public class ScanPackage {
                 File[] filelist = directory.listFiles();
                 for (int i = 0; i < filelist.length; i++) {
                     /**如果当前是文件夹，进入递归扫描文件夹**/
+                    String absolutePath = filelist[i].getAbsolutePath();
+                    absolutePath = absolutePath.replaceAll("\\\\", "/");
                     if (filelist[i].isDirectory()) {
                         /**递归扫描下面的文件夹**/
                         count++;
-                        scanFilesWithRecursion(filelist[i].getAbsolutePath());
+                        scanFilesWithRecursion(absolutePath);
                     }
                     /**非文件夹**/
-                    else if (filelist[i].getAbsolutePath().contains(".csv") && !filelist[i].getAbsolutePath().contains("/0_") && (filelist[i].getAbsolutePath().contains("熵值故障诊断模型") || filelist[i].getAbsolutePath().contains("波动一致性故障诊断模型") || filelist[i].getAbsolutePath().contains("压降一致性故障诊断模型"))) {
-                        if (!scanFiles.contains(filelist[i].getAbsolutePath())) {
-                            scanFiles.add(filelist[i].getAbsolutePath());
+                    else if (absolutePath.contains(".csv") && !absolutePath.contains("/0_") && (absolutePath.contains("熵值故障诊断模型") || absolutePath.contains("波动一致性故障诊断模型") || absolutePath.contains("压降一致性故障诊断模型"))) {
+                        if (!scanFiles.contains(absolutePath)) {
+                            scanFiles.add(absolutePath);
                         }
                     }
                 }
@@ -231,6 +233,15 @@ public class ScanPackage {
         return scanFiles;
     }
 
+    /**
+     * 扫描文件下的所有文件
+     *
+     * @param folderPath
+     * @return java.util.ArrayList<java.lang.String>
+     * @author liwenjie
+     * @creed: Talk is cheap,show me the code
+     * @date 2020/7/14 9:47 上午
+     */
     public static ArrayList<String> scanFiles(String folderPath) {
         ArrayList<String> scanFiles = new ArrayList<>();
         File directory = new File(folderPath);
@@ -259,6 +270,46 @@ public class ScanPackage {
                     if (!scanFiles.contains(filelist[i].getAbsolutePath())) {
                         scanFiles.add(filelist[i].getAbsolutePath());
                     }
+                }
+            }
+        }
+        return scanFiles;
+    }
+
+    /**
+     * 扫描文件下的所有文件
+     *
+     * @param folderPath
+     * @return java.util.ArrayList<java.lang.String>
+     * @author liwenjie
+     * @creed: Talk is cheap,show me the code
+     * @date 2020/7/14 9:47 上午
+     */
+    public static Set<String> scanZipFiles(String folderPath) {
+        Set<String> scanFiles = new LinkedHashSet<>();
+        File directory = new File(folderPath);
+        if (!directory.isDirectory()) {
+            try {
+                throw new FileNotFoundException('"' + folderPath + '"' + " input path is not a Directory , please input the right path of the Directory. ^_^...^_^");
+            } catch (FileNotFoundException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        if (directory.isDirectory()) {
+            File[] filelist = directory.listFiles();
+            for (int i = 0; i < filelist.length; i++) {
+                /**如果当前是文件夹，进入递归扫描文件夹**/
+                if (filelist[i].isDirectory()) {
+                    /**递归扫描下面的文件夹**/
+                    Set<String> strings = scanZipFiles(filelist[i].getAbsolutePath());
+                    for (String string : strings) {
+                        scanFiles.add(string);
+                    }
+                }
+                /**非文件夹**/
+                else {
+                    if (filelist[i].getAbsolutePath().endsWith(".zip"))
+                        scanFiles.add(filelist[i].getAbsolutePath());
                 }
             }
         }
@@ -305,7 +356,7 @@ public class ScanPackage {
         }
         File[] files = file.listFiles();
         for (File file1 : files) {
-            if (file1.isFile()) {
+            if (file1.isFile() && file1.getAbsolutePath().endsWith(".csv")) {
                 fileSet.add(file1.getAbsolutePath());
             }
         }
@@ -397,5 +448,30 @@ public class ScanPackage {
             stringBuffer.append("00");
         }
         return stringBuffer.toString();
+    }
+
+    public static Map<Long, List<String>> getMapItems2(String filePath, int size, int totalSum) {
+
+        Map<Long, List<String>> resultMap = new HashMap<>();
+        int end = totalSum / size + 1;
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)));//到读取的文件
+            String line = null;
+            boolean b = true;
+            int i = 0;
+            while ((line = reader.readLine()) != null) {
+                if (b) {
+                    b = false;
+                    continue;
+                }
+                i++;
+                if (i > end) break;
+                String item[] = line.split(",");//CSV格式文件为逗号分隔符文件，这里根据逗号切分
+                resultMap.put(Long.valueOf(getExcelLongTime(item[1])), Arrays.asList(item));
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return resultMap;
     }
 }

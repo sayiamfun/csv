@@ -5,7 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Enumeration;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -77,11 +77,27 @@ public class UnZipFile {
 
     //测试
     public static void main(String[] args) {
-        try {
-            unZipFiles(new File("/Users/liwenjie/Downloads/testD.zip"), "/Users/liwenjie/Downloads/vehData/vehOut/testD/");
-        } catch (IOException e) {
-            e.printStackTrace();
+//            unZipFiles(new File("/Users/liwenjie/Downloads/testD.zip"), "/Users/liwenjie/Downloads/vehData/vehOut/testD/");
+
+        String inputPath = "/Volumes/UsbDisk/data_analysis/";   //要解压的文件路径
+        String inputPath1 = "/Volumes/UsbDisk/data_analysis2/";   //要解压的文件路径2
+        String outPath = "";   //解压文件输出的路径
+
+        Set<String> strings = ScanPackage.scanZipFiles(inputPath);
+        strings.addAll(ScanPackage.scanZipFiles(inputPath1));
+        List<String> vins = new ArrayList<>();
+        vins.add("8042");
+//            List<String> vins = Arrays.asList("LB378Y4W6JA173771, LB378Y4W7JA172452, LB378Y4W4JA173655, LB378Y4W7JA174007, LB378Y4W8JA172671, LB378Y4W2JA173394, LB378Y4W0JA177671, LB378Y4W9JA176521, LB378Y4W9JA174669, LB378Y4W5JA172711, LB378Y4W6JA177836, LB378Y4W3JA176417, LB378Y4W3JA173680, LB378Y4W6JA176539, LB378Y4W2JA176554, LB378Y4W2JA173637, LB378Y4W2JA175582, LB378Y4W4JA173509, LB378Y4W1JA174066, LB378Y4W3JA176627, LB378Y4W9JA178043, LB378Y4W1JA176531, LB378Y4W3JA174439, LB378Y4W0JA174060, LB378Y4W4JA174370, LB378Y4W7JA177795, LB378Y4WXJA173529, LB378Y4W0JA172454, LB378Y4W2JA175906, LB378Y4W2JA173492, LB378Y4W3JA176479, LB378Y4W5JA173146, LB378Y4W2JA175002, LB378Y4W4JA179407, LB378Y4W1JA174035, LB378Y4WXJA176401, LB378Y4W0JA176455, LB378Y4W8JA174033, LB378Y4W7JA176064, LB378Y4W7JA178574, LB378Y4W8JA173853, LB378Y4W8JA173416, LB378Y4W1JA176478, LB378Y4W2JA179633, LB378Y4W9JA174607, LB378Y4W0JA176469".split(","));
+        for (String string : strings) {
+            for (String vin : vins) {
+                if (string.contains(vin.trim())) {
+                    System.out.println(string);
+//                        UnZipFile.unZipFiles(string, outPath);
+                    break;
+                }
+            }
         }
+
     }
 
 

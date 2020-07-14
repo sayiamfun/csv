@@ -11,7 +11,7 @@ import java.util.*;
  * 计算最大电阻的单体编号
  * 苏朝磊 提供的计算方法
  */
-public class MonomerResistanceCompare {
+public class MonomerResistanceCompareAllInOne {
 
     /**
      * 压差最大有效值
@@ -24,7 +24,7 @@ public class MonomerResistanceCompare {
     /**
      * 一段帧数
      */
-    public static int oneSum = 4000;
+    public static int oneSum = 2000;
     /**
      * 读取文件总条数 最后多少条
      */
@@ -65,7 +65,7 @@ public class MonomerResistanceCompare {
 
     public static void main(String[] args) throws IOException {
 
-        String inputPath = "/Volumes/UsbDisk/veh_49_originData/Volumes/UsbDisk/";
+        String inputPath = "/Users/liwenjie/Downloads/LB378Y4W7JA178042单车分析报告/";
         String inputPath1 = "/Volumes/UsbDisk/data_analysis2/";
         String outPath = "/Users/liwenjie/Downloads/vehData/vehOut/result/";
 
@@ -73,9 +73,9 @@ public class MonomerResistanceCompare {
         Set<String> strings = ScanPackage.scanDirectory(inputPath);
         Map<String, List<String>> map = new HashMap<>();
         for (String string : strings) {
-            if (string.contains("/base64") && string.contains("/year=2020")) {
+            if (string.contains("/base64")) {
                 String[] split = string.split("/");
-                String vin = split[split.length - 4];
+                String vin = split[split.length - 2];
                 if (map.containsKey(vin)) {
                     map.get(vin).add(string);
                 } else {
@@ -108,47 +108,158 @@ public class MonomerResistanceCompare {
      */
     private static void outResultDataByInputPath(List<String> strings, String outPath) {
         Map<Long, List<String>> vData = new TreeMap<>();
-        Map<Long, List<String>> vehData = new TreeMap<>();
         for (String s : strings) {
-            if (s.contains("/singleVoltage")) {
-                Set<String> strings1 = ScanPackage.scanThisDirectoryFile(s);
-                for (String s1 : strings1) {
-                    Map<Long, List<String>> items1 = ScanPackage.getMapItems1(s1, 1, totalSum);
-                    vData.putAll(items1);
-                }
-            } else if (s.contains("/vehicle")) {
-                Set<String> strings1 = ScanPackage.scanThisDirectoryFile(s);
-                for (String s1 : strings1) {
-                    Map<Long, List<String>> items1 = ScanPackage.getMapItems1(s1, 2, totalSum);
-                    vehData.putAll(items1);
-                }
+            Set<String> strings1 = ScanPackage.scanThisDirectoryFile(s);
+            for (String s1 : strings1) {
+                Map<Long, List<String>> items1 = ScanPackage.getMapItems2(s1, strings1.size(), totalSum);
+                vData.putAll(items1);
             }
         }
-        if (vData.size() == 0 || vehData.size() == 0) return;
+        if (vData.size() == 0) return;
         int count = 0;
         if (vData.size() % oneSum == 0) {
             count = vData.size() / oneSum;
         } else {
             count = (vData.size() / oneSum) + 1;
         }
+        ArrayList<Map.Entry<Long, List<String>>> entries = new ArrayList<>(vData.entrySet());
+        Collections.sort(entries, (o1, o2) -> o1.getKey().compareTo(o2.getKey()));
         for (int i = 0; i < count; i++) {
-            ArrayList<Map.Entry<Long, List<String>>> entries = new ArrayList<>(vehData.entrySet());
+
             int start = i * oneSum;
             int end = (i + 1) * oneSum;
-
             if (vData.size() < end) {
-                List<Map.Entry<Long, List<String>>> entries1 = entries.subList(start, vehData.size());
+                List<Map.Entry<Long, List<String>>> entries1 = entries.subList(start, vData.size());
                 Map<Long, List<String>> tmpMap = new LinkedHashMap<>();
                 entries1.stream().forEach(longListEntry -> tmpMap.put(longListEntry.getKey(), longListEntry.getValue()));
-                outResultData(outPath, vData, tmpMap);
+                outResultData(outPath, tmpMap);
             } else {
                 List<Map.Entry<Long, List<String>>> entries1 = entries.subList(start, end);
                 Map<Long, List<String>> tmpMap = new LinkedHashMap<>();
                 entries1.stream().forEach(longListEntry -> tmpMap.put(longListEntry.getKey(), longListEntry.getValue()));
-                outResultData(outPath, vData, tmpMap);
+                outResultData(outPath, tmpMap);
             }
         }
 
+    }
+
+    private static void outResultData(String outPath, Map<Long, List<String>> tmpMap) {
+        ResultData resultData = runCompare(tmpMap);
+        OutputStreamWriter ow = null;
+        BufferedWriter bw = null;
+        try {
+            outPath = mkdirDir(outPath);
+//            ow = new OutputStreamWriter(new FileOutputStream(new File(outPath + resultData.getVin() + "-" + resultData.getStartTime() + "-" + resultData.getEndTime() + ".csv"), true), ScanPackage.encode);
+            ow = new OutputStreamWriter(new FileOutputStream(new File(outPath + resultData.getVin() + ".csv"), true), ScanPackage.encode);
+            bw = new BufferedWriter(ow);
+            if (first) {
+                bw.write("vin,开始时间,结束时间," +
+                        "充电最大压差,充电最大压差SOC,充电最大压差电流," +
+                        "充电最小压差,充电最小压差SOC,充电最小压差电流,充电△V平均值," +
+                        "放电最大压差,放电最大压差SOC,放电最大压差电流," +
+                        "放电最小压差,放电最小压差SOC,放电最小压差电流,放电△V平均值," +
+                        "内阻较大单体编号(前10)"); //中间，隔开不同的单元格，一次写一行
+                bw.newLine();
+                bw.flush();
+                first = false;
+            }
+            bw.write(resultData.toString());
+            bw.newLine();
+            bw.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (null != bw) bw.close();
+                if (null != ow) ow.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println(resultData);
+    }
+
+    private static ResultData runCompare(Map<Long, List<String>> vehData) {
+        ResultData resultData = new ResultData();
+        String vin = "";
+        Long startTime = 0L;//数据开始时间
+        Long endTime = 0L;//数据结束时间
+
+        List<FirstStepData> charge = new ArrayList<>();
+        List<FirstStepData> run = new ArrayList<>();
+        FirstStepData firstStepData = null;
+        List<String> monAndVList = null;
+        for (Map.Entry<Long, List<String>> longListEntry : vehData.entrySet()) {
+            List<String> value = longListEntry.getValue();
+            vin = value.get(0);
+            Long time = longListEntry.getKey();
+            if (startTime == 0 || time < startTime) startTime = time;
+            if (endTime == 0 || time > endTime) endTime = time;
+            double SOC = Double.parseDouble(getStringValue(value.get(10), "0.0"));
+            String carStatus = value.get(3);
+            String chargeStatus = value.get(4);
+            double totalE = Double.parseDouble(getStringValue(value.get(9), "0.0"));
+            List<String> strings3 = Arrays.asList(value.get(70).split("_"));
+            int maxMon = 0;
+            double maxV = defaultDouble;
+            int minMon = 0;
+            double minV = defaultDouble;
+            monAndVList = new LinkedList<>();
+            for (int i = 0; i < strings3.size(); i++) {
+                double v = Double.parseDouble(strings3.get(i));
+                monAndVList.add((i + 1) + ":" + v);
+                if (v > maxV || maxV == defaultDouble) {
+                    maxV = v;
+                    maxMon = i + 1;
+                } else if (v < minV || minV == defaultDouble) {
+                    minV = v;
+                    minMon = i + 1;
+                }
+
+            }
+            double v = maxV - minV;
+            firstStepData = new FirstStepData(vin, time, SOC, carStatus, chargeStatus, totalE, maxV, maxMon, minV, minMon, v, monAndVList);
+            if ("停车充电".equals(chargeStatus)) {
+                charge.add(firstStepData);
+            } else {
+                run.add(firstStepData);
+            }
+        }
+        resultData.setVin(vin);
+        resultData.setStartTime(startTime);
+        resultData.setEndTime(endTime);
+
+        Collections.sort(run, (o1, o2) -> o1.getTime().compareTo(o2.getTime()));
+        Map<String, String> extremeVale = getExtremeVale(run);
+        if (null != extremeVale) {
+            resultData.setRunMaxSubV(extremeVale.get(maxSubV));
+            resultData.setRunMaxSubVSOC(extremeVale.get(maxSubVSOC));
+            resultData.setRunMaxSubVI(extremeVale.get(maxSubVI));
+            resultData.setRunMinSubV(extremeVale.get(minSubV));
+            resultData.setRunMinSubVSOC(extremeVale.get(minSubVSOC));
+            resultData.setRunMinSubVI(extremeVale.get(minSubVI));
+            resultData.setMonList(extremeVale.get(monList));
+
+            resultData.setRunAvargeSubV(extremeVale.get(avargeSubV));
+        }
+
+        extremeVale = getExtremeVale(charge);
+        if (null != extremeVale) {
+            resultData.setChargeMaxSubV(extremeVale.get(maxSubV));
+            resultData.setChargeMaxSubVSOC(extremeVale.get(maxSubVSOC));
+            resultData.setChargeMaxSubVI(extremeVale.get(maxSubVI));
+            resultData.setChargeMinSubV(extremeVale.get(minSubV));
+            resultData.setChargeMinSubVSOC(extremeVale.get(minSubVSOC));
+            resultData.setChargeMinSubVI(extremeVale.get(minSubVI));
+
+            resultData.setChargeAvargeSubV(extremeVale.get(avargeSubV));
+        }
+
+        return resultData;
+    }
+
+    private static String getStringValue(String s, String s1) {
+        return StringUtils.isEmpty(s) ? s1 : s;
     }
 
     /**
