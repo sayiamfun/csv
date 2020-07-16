@@ -222,8 +222,11 @@ public class PressureDifferenceRateAnalysis {
         }
         resultList.stream().forEach(System.out::println);
         System.out.println(resultList.size());
-        for (Map.Entry<Long, List<String>> longListEntry : tmpList) {
+        Iterator<Map.Entry<Long, List<String>>> iterator = tmpList.iterator();
 
+        while (iterator.hasNext()){
+            Map.Entry<Long, List<String>> next = iterator.next();
+            Calendar calendar = Calendar.getInstance();
         }
     }
 
