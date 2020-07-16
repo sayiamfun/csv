@@ -390,7 +390,7 @@ public class ScanPackage {
                 String item[] = line.split(",");//CSV格式文件为逗号分隔符文件，这里根据逗号切分
                 if (1 == type) {
                     resultMap.put(Long.valueOf(item[1]), Arrays.asList(item));
-                } else {
+                } else if (2 == type) {
                     resultMap.put(Long.valueOf(getExcelLongTime(item[1])), Arrays.asList(item));
                 }
             }

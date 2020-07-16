@@ -1,9 +1,11 @@
 package com.sayiamfun.StatisticalAnalysisOfResults;
 
+import com.sayiamfun.StatisticalAnalysisOfResults.casion.CreatWord;
 import com.sayiamfun.common.Constant;
 import com.sayiamfun.common.DateUtils;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.docx4j.wml.R;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,7 +158,7 @@ public class FrequencyStatistics {
             int time = 3;//时间
             //获取时间
             Long dataTime = getaLongTime(s);
-            if (dataTime < needTime) continue;
+//            if (dataTime < needTime) continue;
             setStartTime(dataTime);
             //读取文件内容
             List<List<String>> lists = ReadToList(s);
@@ -368,7 +370,7 @@ public class FrequencyStatistics {
             if (!s.contains("_压降一致性故障诊断模型")) continue;
             //获取时间
             Long dataTime = getaLongTime(s);
-            if (dataTime < needTime) continue;
+//            if (dataTime < needTime) continue;
             setStartTime(dataTime);
             //读取文件内容
             List<List<String>> lists = ReadToList(s);
@@ -663,7 +665,7 @@ public class FrequencyStatistics {
             if (!s.contains("_熵值故障诊断模型")) continue;
             //获取时间
             Long dataTime = getaLongTime(s);
-            if (dataTime < needTime) continue;
+//            if (dataTime < needTime) continue;
             setStartTime(dataTime);
             //读取文件内容
             List<List<String>> lists = ReadToList(s);
@@ -1895,12 +1897,12 @@ public class FrequencyStatistics {
     /**
      * 输出图表
      */
-    public void outIcon(String outPath) {
+   /* public void outIcon(String outPath) {
         if (null == getVIN()) return;
         if (!outPath.endsWith("/")) outPath += "/";
-        /**
-         * 全生命周期频率
-         */
+        *//**
+     * 全生命周期频率
+     *//*
         if (getEntropyMapBatterSum().size() > 0) {
             XDocUtil.outLine(XDocUtil.getData(getEntropyMapBatterSum(), "异常率", getEntropySum()), Constant.templatePath, outPath + getVIN() + "_" + getType() + "EARate.docx");
         }
@@ -1910,9 +1912,9 @@ public class FrequencyStatistics {
         if (getPressureDropConsistencyMapBatterSum().size() > 0) {
             XDocUtil.outLine(XDocUtil.getData(getPressureDropConsistencyMapBatterSum(), "异常率", getPressureDropConsistencySum()), Constant.templatePath, outPath + getVIN() + "_" + getType() + "PARate.docx");
         }
-        /**
-         * 每周频率
-         */
+        *//**
+     * 每周频率
+     *//*
         Map<Long, Map<Integer, Double>> weekRate = getWeekRate(getEntropyMapWeek());
         if (getEntropyMapWeek().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
@@ -1937,9 +1939,11 @@ public class FrequencyStatistics {
         } else if (getPressureDropConsistencyMapWeek().size() > 1) {
             XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "PWRate.docx");
         }
-        /**
-         * 每1500帧次数
-         */
+        */
+
+    /**
+     * 每1500帧次数
+     *//*
         if (getEntropyMapNums().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : getEntropyMapNums().entrySet()) {
                 XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "EENum.docx");
@@ -1960,6 +1964,74 @@ public class FrequencyStatistics {
             }
         } else if (getPressureDropConsistencyMapNums().size() > 1) {
             XDocUtil.outLine(XDocUtil.getData(getPressureDropConsistencyMapNums(), getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "PENum.docx");
+        }
+        Merge2.merge(outPath, getVIN(), getType(), this);
+    }*/
+    public void outIcon(String outPath) {
+        if (null == getVIN()) return;
+        if (!outPath.endsWith("/")) outPath += "/";
+        /**
+         * 全生命周期频率
+         */
+        if (getEntropyMapBatterSum().size() > 0) {
+            CreatWord.creatWotdOne(CreatWord.getData(getEntropyMapBatterSum()), Constant.createWordOne, outPath, getVIN() + "_" + getType() + "EARate.docx");
+        }
+        if (getVolatilityDetectionMapBatterSum().size() > 0) {
+            CreatWord.creatWotdOne(CreatWord.getData(getVolatilityDetectionMapBatterSum()), Constant.createWordOne, outPath, getVIN() + "_" + getType() + "VARate.docx");
+        }
+        if (getPressureDropConsistencyMapBatterSum().size() > 0) {
+            CreatWord.creatWotdOne(CreatWord.getData(getPressureDropConsistencyMapBatterSum()), Constant.createWordOne, outPath, getVIN() + "_" + getType() + "PARate.docx");
+        }
+        /**
+         * 每周频率
+         */
+        Map<Long, Map<Integer, Double>> weekRate = getWeekRate(getEntropyMapWeek());
+        if (getEntropyMapWeek().size() == 1) {
+            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
+                CreatWord.creatWotdOne(longMapEntry.getValue(), Constant.createWordOne, outPath, getVIN() + "_" + getType() + "EWRate.docx");
+            }
+        } else if (getEntropyMapWeek().size() > 1) {
+            CreatWord.createWotdTwoWeek(weekRate, getBatteryNum(), Constant.createWordTwo, outPath, getVIN() + "_" + getType() + "EWRate.docx");
+        }
+        weekRate = getWeekRate(getVolatilityDetectionMapWeek());
+        if (getVolatilityDetectionMapWeek().size() == 1) {
+            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
+                CreatWord.creatWotdOne(longMapEntry.getValue(), Constant.createWordOne, outPath, getVIN() + "_" + getType() + "VWRate.docx");
+            }
+        } else if (getVolatilityDetectionMapWeek().size() > 1) {
+            CreatWord.createWotdTwoWeek(weekRate, getBatteryNum(), Constant.createWordTwo, outPath, getVIN() + "_" + getType() + "VWRate.docx");
+        }
+        weekRate = getWeekRate(getPressureDropConsistencyMapWeek());
+        if (getPressureDropConsistencyMapWeek().size() == 1) {
+            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
+                CreatWord.creatWotdOne(longMapEntry.getValue(), Constant.createWordOne, outPath, getVIN() + "_" + getType() + "PWRate.docx");
+            }
+        } else if (getPressureDropConsistencyMapWeek().size() > 1) {
+            CreatWord.createWotdTwoWeek(weekRate, getBatteryNum(), Constant.createWordTwo, outPath, getVIN() + "_" + getType() + "PWRate.docx");
+        }
+        /**
+         * 每1500帧次数
+         */
+        if (getEntropyMapNums().size() == 1) {
+            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : getEntropyMapNums().entrySet()) {
+                CreatWord.creatWotdOne(CreatWord.getData(longMapEntry.getValue()), Constant.createWordOne, outPath, getVIN() + "_" + getType() + "EENum.docx");
+            }
+        } else if (getEntropyMapNums().size() > 1) {
+            CreatWord.createWotdTwoNums(getEntropyMapNums(), getBatteryNum(), Constant.createWordTwo, outPath, getVIN() + "_" + getType() + "EENum.docx");
+        }
+        if (getVolatilityDetectionMapNums().size() == 1) {
+            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : getVolatilityDetectionMapNums().entrySet()) {
+                CreatWord.creatWotdOne(CreatWord.getData(longMapEntry.getValue()), Constant.createWordOne, outPath, getVIN() + "_" + getType() + "VENum.docx");
+            }
+        } else if (getVolatilityDetectionMapNums().size() > 1) {
+            CreatWord.createWotdTwoNums(getEntropyMapNums(), getBatteryNum(), Constant.createWordTwo, outPath, getVIN() + "_" + getType() + "VENum.docx");
+        }
+        if (getPressureDropConsistencyMapNums().size() == 1) {
+            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : getPressureDropConsistencyMapNums().entrySet()) {
+                CreatWord.creatWotdOne(CreatWord.getData(longMapEntry.getValue()), Constant.createWordOne, outPath, getVIN() + "_" + getType() + "PENum.docx");
+            }
+        } else if (getPressureDropConsistencyMapNums().size() > 1) {
+            CreatWord.createWotdTwoNums(getEntropyMapNums(), getBatteryNum(), Constant.createWordTwo, outPath, getVIN() + "_" + getType() + "PENum.docx");
         }
         Merge2.merge(outPath, getVIN(), getType(), this);
     }

@@ -140,7 +140,7 @@ public class Merge2 {
         String text = doc0.getText();
         String[] split = text.split("\n");
         for (String s1 : split) {
-            if (s1.contains("高速") || s1.contains("稳定") || s1.contains("无广告"))
+            if (s1.contains("高速") || s1.contains("稳定") || s1.contains("无广告") || s1.contains("Evaluation"))
                 doc0.replace(s1.trim(), "", false, true);
         }
         //保存合并后的文档
