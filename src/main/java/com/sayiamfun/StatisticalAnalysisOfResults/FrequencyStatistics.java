@@ -156,16 +156,9 @@ public class FrequencyStatistics {
             int type = 7;//充放电状态
 //            int abnormalMon = 6;//异常单体
             int time = 3;//时间
-            //获取时间
-            Long dataTime = getaLongTime(s);
-//            if (dataTime < needTime) continue;
-            setStartTime(dataTime);
+
             //读取文件内容
             List<List<String>> lists = ReadToList(s);
-            Map<Integer, Integer> tmpMap = getVolatilityDetectionMapNums().get(dataTime);
-            if (null == tmpMap) tmpMap = new TreeMap<>(); //存放一天的数据
-            Map<Integer, Double> tmpSumMap = getVolatilityDetectionMapDayVSum().get(dataTime);
-            if (null == tmpSumMap) tmpSumMap = new TreeMap<>();
             lists.sort((o1, o2) -> new BigDecimal(o1.get(time)).compareTo(new BigDecimal(o2.get(time))));
             Map<Integer, Double> maxVMap = null;
             for (List<String> list : lists) {
@@ -178,6 +171,15 @@ public class FrequencyStatistics {
                 String[] s4 = quaList.split("_");
                 int maxMonNum = 0;
                 double maxZ = 0.0;
+                Long dataTime = Long.valueOf(list.get(time));
+                //获取时间
+//            if (dataTime < needTime) continue;
+                setStartTime(dataTime);
+                Map<Integer, Integer> tmpMap = getVolatilityDetectionMapDay().get(dataTime);
+                if (null == tmpMap) tmpMap = new TreeMap<>(); //存放一天的数据
+                Map<Integer, Double> tmpSumMap = getVolatilityDetectionMapDayVSum().get(dataTime);
+                if (null == tmpSumMap) tmpSumMap = new TreeMap<>();
+
                 for (String s3 : s4) {
                     String[] split = s3.split(":");
                     if (split.length == 2) {
@@ -229,7 +231,7 @@ public class FrequencyStatistics {
                         /**
                          * 充电状态
                          */
-                        Long thisTime = Long.valueOf(list.get(time));
+                        Long thisTime = dataTime;
                         if (lastTime == 0) {
                             lastTime = thisTime;
                             lastStartTime = thisTime;
@@ -254,6 +256,15 @@ public class FrequencyStatistics {
                         }
                     }
                 }
+                /**
+                 * 每天数据
+                 */
+                if (tmpMap.size() > 0) {
+                    getVolatilityDetectionMapDay().put(dataTime, tmpMap);
+                }
+                if (tmpSumMap.size() > 0) {
+                    getVolatilityDetectionMapDayVSum().put(dataTime, tmpSumMap);
+                }
                 maxVMap = new HashMap<>();
                 maxVMap.put(maxMonNum, maxZ);
                 getVolatilityDetectionZmaxMapList().add(maxVMap);
@@ -271,15 +282,6 @@ public class FrequencyStatistics {
                     nums = 0;
                     numsindex++;
                 }
-            }
-            /**
-             * 每天数据
-             */
-            if (tmpMap.size() > 0) {
-                getVolatilityDetectionMapDay().put(dataTime, tmpMap);
-            }
-            if (tmpSumMap.size() > 0) {
-                getVolatilityDetectionMapDayVSum().put(dataTime, tmpSumMap);
             }
             if (typeMap.size() > 0) {
                 String startTAndEndT = "" + lastStartTime + "-" + lastEndTime;
@@ -368,16 +370,8 @@ public class FrequencyStatistics {
 
         for (String s : getPressureDropConsistencyList()) {
             if (!s.contains("_压降一致性故障诊断模型")) continue;
-            //获取时间
-            Long dataTime = getaLongTime(s);
-//            if (dataTime < needTime) continue;
-            setStartTime(dataTime);
             //读取文件内容
             List<List<String>> lists = ReadToList(s);
-            Map<Integer, Integer> tmpMap = getPressureDropConsistencyMapDay().get(dataTime);
-            if (null == tmpMap) tmpMap = new TreeMap<>(); //存放一天的数据
-            Map<Integer, Double> tmpSumMap = getPressureDropConsistencyMapDayZSum().get(dataTime);
-            if (null == tmpSumMap) tmpSumMap = new TreeMap<>();
             Iterator<List<String>> iterator = lists.iterator();
             Map<Integer, Double> maxVMap = null;
             while (iterator.hasNext()) {
@@ -390,6 +384,14 @@ public class FrequencyStatistics {
                 if (next.size() < tyep + 1) continue;
                 if (!getType().equals(next.get(tyep))) continue;
 
+                //获取时间
+                Long dataTime = Long.valueOf(next.get(time));
+//            if (dataTime < needTime) continue;
+                setStartTime(dataTime);
+                Map<Integer, Integer> tmpMap = getPressureDropConsistencyMapDay().get(dataTime);
+                if (null == tmpMap) tmpMap = new TreeMap<>(); //存放一天的数据
+                Map<Integer, Double> tmpSumMap = getPressureDropConsistencyMapDayZSum().get(dataTime);
+                if (null == tmpSumMap) tmpSumMap = new TreeMap<>();
                 /**
                  * 压差倍数差的和
                  */
@@ -468,6 +470,14 @@ public class FrequencyStatistics {
                     maxVMap.put(1, 0.0);
                     getPressureDropConsistencyZMaxMapList().add(maxVMap);
                 }
+
+                //将当天数据放入
+                if (tmpMap.size() > 0) {
+                    getPressureDropConsistencyMapDay().put(dataTime, tmpMap);
+                }
+                if (tmpSumMap.size() > 0) {
+                    getPressureDropConsistencyMapDayZSum().put(dataTime, tmpSumMap);
+                }
                 nums++;
                 /**
                  * 每1500条数据放入
@@ -486,102 +496,8 @@ public class FrequencyStatistics {
                 //获取vin
                 if (getVIN() == null)
                     setVIN(next.get(1));
-                //删除不符合条件的数据
-//                if (new BigDecimal(next.get(11)).abs().compareTo(new BigDecimal("0.02")) < 0) {
-//                    iterator.remove();
-//                }
             }
-            if (tmpSumMap.size() > 0) {
-                getPressureDropConsistencyMapDayZSum().put(dataTime, tmpSumMap);
-            }
-//            if (lists.size() == 0) continue;
-//            //开始统计今天所有数据   将最小压差绝对值小于 0.02 的删除
-//            //排序取最大压差绝对值与最小压差绝对值比最大的五条
-//            Collections.sort(lists, new Comparator<List<String>>() {
-//                @Override
-//                public int compare(List<String> o1, List<String> o2) {
-//                    if (new BigDecimal(o2.get(14)).compareTo(new BigDecimal(o1.get(14))) != 0)
-//                        return new BigDecimal(o2.get(14)).compareTo(new BigDecimal(o1.get(14)));
-//                    return new BigDecimal(o2.get(10)).abs().compareTo(new BigDecimal(o1.get(10)).abs());
-//                }
-//            });
-//            //根据规则获取需要保留的数据
-//            int size = lists.size();
-//            if (size > 5) {
-//                int index = 5;
-//                int index2 = 5;
-//                while (index < size && new BigDecimal(lists.get(index).get(14)).compareTo(new BigDecimal(lists.get(index - 1).get(14))) == 0) {
-//                    index++;
-//                }
-//                if (index > 5) {
-//                    while (index2 < index && new BigDecimal(lists.get(index2).get(10)).abs().compareTo(new BigDecimal(lists.get(index2 - 1).get(10)).abs()) == 0) {
-//                        index2++;
-//                    }
-//                }
-//                size = index2;
-//            }
-//            lists.sort((o1, o2) -> new BigDecimal(o1.get(4)).compareTo(new BigDecimal(o2.get(4))));
-//            for (int i = 0; i < size; i++) {
-//                /**
-//                 * 每天数据
-//                 */
-//                List<String> list = lists.get(i);
-//                int monNum = getInt(list.get(12));
-//                if (!getType().equals(list.get(15))) continue;
-//                if (tmpMap.containsKey(monNum)) {
-//                    tmpMap.put(monNum, tmpMap.get(monNum) + 1);
-//                } else {
-//                    tmpMap.put(monNum, 1);
-//                }
-//                /**
-//                 * 每1500条数据
-//                 */
-//                if (numsMap.containsKey(monNum)) {
-//                    numsMap.put(monNum, numsMap.get(monNum) + 1);
-//                } else {
-//                    numsMap.put(monNum, 1);
-//                }
-//                nums++;
-//                /**
-//                 * 每1500条数据放入
-//                 */
-//                if (nums >= getPressureNums()) {
-//                    getPressureDropConsistencyMapNums().put(numsindex * 1L, numsMap);
-//                    numsMap = new TreeMap<>();
-//                    nums = 0;
-//                    numsindex++;
-//                }
-//                /**
-//                 * 充电状态
-//                 */
-//                Long thisTime = Long.valueOf(list.get(4));
-//                if (lastTime == 0) {
-//                    lastTime = thisTime;
-//                    lastStartTime = thisTime;
-//                }
-//                Date thisdate = DateUtils.strToDate("" + thisTime);
-//                Date lastdate = DateUtils.strToDate("" + lastTime);
-//                if (null != lastdate && ((thisdate.getTime() - lastdate.getTime()) / 1000) > getTimeDifference()) {
-//                    lastTime = thisTime;
-//                    lastEndTime = thisTime;
-//                    String s3 = "" + lastStartTime + "-" + lastEndTime;
-//                    getPressureDropConsistencyMapType().put(s3, typeMap);
-//                    typeMap = new TreeMap<>();
-//                    lastStartTime = thisTime;
-//                } else {
-//                    if (typeMap.containsKey(monNum)) {
-//                        typeMap.put(monNum, typeMap.get(monNum) + 1);
-//                    } else {
-//                        typeMap.put(monNum, 1);
-//                    }
-//                    lastTime = thisTime;
-//                    lastEndTime = thisTime;
-//                }
-//            }
-            //将当天数据放入
-            if (tmpMap.size() > 0) {
-                getPressureDropConsistencyMapDay().put(dataTime, tmpMap);
-            }
+
             if (typeMap.size() > 0) {
                 String s3 = "" + lastStartTime + "-" + lastEndTime;
                 getPressureDropConsistencyMapType().put(s3, typeMap);
@@ -663,16 +579,8 @@ public class FrequencyStatistics {
         Long lastEndTime = 0L;
         for (String s : getEntropyList()) {
             if (!s.contains("_熵值故障诊断模型")) continue;
-            //获取时间
-            Long dataTime = getaLongTime(s);
-//            if (dataTime < needTime) continue;
-            setStartTime(dataTime);
             //读取文件内容
             List<List<String>> lists = ReadToList(s);
-            Map<Integer, Integer> tmpMap = getEntropyMapDay().get(dataTime);
-            if (null == tmpMap) tmpMap = new TreeMap<>(); //存放一天的数据
-            Map<Integer, Double> tmpSumMap = getEntropyMapDayXiShuSum().get(dataTime);
-            if (null == tmpSumMap) tmpSumMap = new TreeMap<>(); //存放一天的(系数减去4)的和
             lists.sort((o1, o2) -> new BigDecimal(o1.get(2)).compareTo(new BigDecimal(o2.get(2))));
             Map<Integer, Double> maxVMap = null;
             for (List<String> list : lists) {
@@ -685,6 +593,17 @@ public class FrequencyStatistics {
                 if (!getType().equals(list.get(type))) continue;
                 String s1 = list.get(maxMon);
                 if (StringUtils.isEmpty(s1)) continue;
+
+
+                //获取时间
+                Long dataTime = Long.valueOf(list.get(time));
+                setStartTime(dataTime);
+
+                Map<Integer, Integer> tmpMap = getEntropyMapDay().get(dataTime);
+                if (null == tmpMap) tmpMap = new TreeMap<>(); //存放一天的数据
+                Map<Integer, Double> tmpSumMap = getEntropyMapDayXiShuSum().get(dataTime);
+                if (null == tmpSumMap) tmpSumMap = new TreeMap<>(); //存放一天的(系数减去4)的和
+
                 int monNum = Integer.parseInt(s1);
                 if (getBatteryNum() == 0) {
                     /** 存放单体数量 */
@@ -734,7 +653,7 @@ public class FrequencyStatistics {
                     /**
                      * 充电状态
                      */
-                    Long thisTime = Long.valueOf(list.get(time));
+                    Long thisTime = dataTime;
                     if (lastTime == 0) {
                         lastTime = thisTime;
                         lastStartTime = thisTime;
@@ -762,6 +681,15 @@ public class FrequencyStatistics {
                     maxVMap.put(1, 0.0);
                     getEntropyZmaxMapList().add(maxVMap);
                 }
+                /**
+                 * 天数据
+                 */
+                if (tmpMap.size() > 0) {
+                    getEntropyMapDay().put(dataTime, tmpMap);
+                }
+                if (tmpSumMap.size() > 0) {
+                    getEntropyMapDayXiShuSum().put(dataTime, tmpSumMap);
+                }
                 nums++;
                 /**
                  * 每1500条数据 存储
@@ -775,15 +703,6 @@ public class FrequencyStatistics {
                     index++;
                 }
 
-            }
-            /**
-             * 天数据
-             */
-            if (tmpMap.size() > 0) {
-                getEntropyMapDay().put(dataTime, tmpMap);
-            }
-            if (tmpSumMap.size() > 0) {
-                getEntropyMapDayXiShuSum().put(dataTime, tmpSumMap);
             }
             if (typeMap.size() > 0) {
                 String s3 = "" + lastStartTime + "-" + lastEndTime;
@@ -1897,76 +1816,76 @@ public class FrequencyStatistics {
     /**
      * 输出图表
      */
-   /* public void outIcon(String outPath) {
-        if (null == getVIN()) return;
-        if (!outPath.endsWith("/")) outPath += "/";
-        *//**
-     * 全生命周期频率
-     *//*
-        if (getEntropyMapBatterSum().size() > 0) {
-            XDocUtil.outLine(XDocUtil.getData(getEntropyMapBatterSum(), "异常率", getEntropySum()), Constant.templatePath, outPath + getVIN() + "_" + getType() + "EARate.docx");
-        }
-        if (getVolatilityDetectionMapBatterSum().size() > 0) {
-            XDocUtil.outLine(XDocUtil.getData(getVolatilityDetectionMapBatterSum(), "异常率", getVolatilityDetectionSum()), Constant.templatePath, outPath + getVIN() + "_" + getType() + "VARate.docx");
-        }
-        if (getPressureDropConsistencyMapBatterSum().size() > 0) {
-            XDocUtil.outLine(XDocUtil.getData(getPressureDropConsistencyMapBatterSum(), "异常率", getPressureDropConsistencySum()), Constant.templatePath, outPath + getVIN() + "_" + getType() + "PARate.docx");
-        }
-        *//**
-     * 每周频率
-     *//*
-        Map<Long, Map<Integer, Double>> weekRate = getWeekRate(getEntropyMapWeek());
-        if (getEntropyMapWeek().size() == 1) {
-            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
-                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "异常率"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "EWRate.docx");
-            }
-        } else if (getEntropyMapWeek().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "EWRate.docx");
-        }
-        weekRate = getWeekRate(getVolatilityDetectionMapWeek());
-        if (getVolatilityDetectionMapWeek().size() == 1) {
-            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
-                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "异常率"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "VWRate.docx");
-            }
-        } else if (getVolatilityDetectionMapWeek().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "VWRate.docx");
-        }
-        weekRate = getWeekRate(getPressureDropConsistencyMapWeek());
-        if (getPressureDropConsistencyMapWeek().size() == 1) {
-            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
-                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "异常率"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "PWRate.docx");
-            }
-        } else if (getPressureDropConsistencyMapWeek().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "PWRate.docx");
-        }
-        */
-
-    /**
-     * 每1500帧次数
-     *//*
-        if (getEntropyMapNums().size() == 1) {
-            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : getEntropyMapNums().entrySet()) {
-                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "EENum.docx");
-            }
-        } else if (getEntropyMapNums().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getData(getEntropyMapNums(), getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "EENum.docx");
-        }
-        if (getVolatilityDetectionMapNums().size() == 1) {
-            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : getVolatilityDetectionMapNums().entrySet()) {
-                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "VENum.docx");
-            }
-        } else if (getVolatilityDetectionMapNums().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getData(getVolatilityDetectionMapNums(), getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "VENum.docx");
-        }
-        if (getPressureDropConsistencyMapNums().size() == 1) {
-            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : getPressureDropConsistencyMapNums().entrySet()) {
-                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "PENum.docx");
-            }
-        } else if (getPressureDropConsistencyMapNums().size() > 1) {
-            XDocUtil.outLine(XDocUtil.getData(getPressureDropConsistencyMapNums(), getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "PENum.docx");
-        }
-        Merge2.merge(outPath, getVIN(), getType(), this);
-    }*/
+//    public void outIcon(String outPath) {
+//        if (null == getVIN()) return;
+//        if (!outPath.endsWith("/")) outPath += "/";
+//        /**
+//         * 全生命周期频率
+//         */
+//        if (getEntropyMapBatterSum().size() > 0) {
+//            XDocUtil.outLine(XDocUtil.getData(getEntropyMapBatterSum(), "异常率", getEntropySum()), Constant.templatePath, outPath + getVIN() + "_" + getType() + "EARate.docx");
+//        }
+//        if (getVolatilityDetectionMapBatterSum().size() > 0) {
+//            XDocUtil.outLine(XDocUtil.getData(getVolatilityDetectionMapBatterSum(), "异常率", getVolatilityDetectionSum()), Constant.templatePath, outPath + getVIN() + "_" + getType() + "VARate.docx");
+//        }
+//        if (getPressureDropConsistencyMapBatterSum().size() > 0) {
+//            XDocUtil.outLine(XDocUtil.getData(getPressureDropConsistencyMapBatterSum(), "异常率", getPressureDropConsistencySum()), Constant.templatePath, outPath + getVIN() + "_" + getType() + "PARate.docx");
+//        }
+//        /**
+//         * 每周频率
+//         */
+//        Map<Long, Map<Integer, Double>> weekRate = getWeekRate(getEntropyMapWeek());
+//        if (getEntropyMapWeek().size() == 1) {
+//            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
+//                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "异常率"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "EWRate.docx");
+//            }
+//        } else if (getEntropyMapWeek().size() > 1) {
+//            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "EWRate.docx");
+//        }
+//        weekRate = getWeekRate(getVolatilityDetectionMapWeek());
+//        if (getVolatilityDetectionMapWeek().size() == 1) {
+//            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
+//                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "异常率"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "VWRate.docx");
+//            }
+//        } else if (getVolatilityDetectionMapWeek().size() > 1) {
+//            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "VWRate.docx");
+//        }
+//        weekRate = getWeekRate(getPressureDropConsistencyMapWeek());
+//        if (getPressureDropConsistencyMapWeek().size() == 1) {
+//            for (Map.Entry<Long, Map<Integer, Double>> longMapEntry : weekRate.entrySet()) {
+//                XDocUtil.outLine(XDocUtil.getData(longMapEntry.getValue(), "异常率"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "PWRate.docx");
+//            }
+//        } else if (getPressureDropConsistencyMapWeek().size() > 1) {
+//            XDocUtil.outLine(XDocUtil.getDoubleData(weekRate, getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "PWRate.docx");
+//        }
+//
+//
+//        /**
+//         * 每1500帧次数
+//         */
+//        if (getEntropyMapNums().size() == 1) {
+//            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : getEntropyMapNums().entrySet()) {
+//                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "EENum.docx");
+//            }
+//        } else if (getEntropyMapNums().size() > 1) {
+//            XDocUtil.outLine(XDocUtil.getData(getEntropyMapNums(), getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "EENum.docx");
+//        }
+//        if (getVolatilityDetectionMapNums().size() == 1) {
+//            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : getVolatilityDetectionMapNums().entrySet()) {
+//                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "VENum.docx");
+//            }
+//        } else if (getVolatilityDetectionMapNums().size() > 1) {
+//            XDocUtil.outLine(XDocUtil.getData(getVolatilityDetectionMapNums(), getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "VENum.docx");
+//        }
+//        if (getPressureDropConsistencyMapNums().size() == 1) {
+//            for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : getPressureDropConsistencyMapNums().entrySet()) {
+//                XDocUtil.outLine(XDocUtil.getIntegerData(longMapEntry.getValue(), "次数"), Constant.templatePath, outPath + getVIN() + "_" + getType() + "PENum.docx");
+//            }
+//        } else if (getPressureDropConsistencyMapNums().size() > 1) {
+//            XDocUtil.outLine(XDocUtil.getData(getPressureDropConsistencyMapNums(), getBatteryNum()), Constant.templatePath2, outPath + getVIN() + "_" + getType() + "PENum.docx");
+//        }
+//        Merge2.merge(outPath, getVIN(), getType(), this);
+//    }
     public void outIcon(String outPath) {
         if (null == getVIN()) return;
         if (!outPath.endsWith("/")) outPath += "/";
