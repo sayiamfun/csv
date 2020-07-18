@@ -62,10 +62,12 @@ public class MonomerResistanceCompareAllInOne {
     private static String monList = "monList";//单体编号列表（阻值较大）
     private static String avargeSubV;// △V 均值
 
+    private static int vinIndex = 4;
+
 
     public static void main(String[] args) throws IOException {
 
-        String inputPath = "/Users/liwenjie/Downloads/LB378Y4W7JA178042单车分析报告/";
+        String inputPath = "/Volumes/UsbDisk/尹豪3车数据/";
         String inputPath1 = "/Volumes/UsbDisk/data_analysis2/";
         String outPath = "/Users/liwenjie/Downloads/vehData/vehOut/result/";
 
@@ -75,7 +77,7 @@ public class MonomerResistanceCompareAllInOne {
         for (String string : strings) {
             if (string.contains("/base64")) {
                 String[] split = string.split("/");
-                String vin = split[split.length - 2];
+                String vin = split[vinIndex];
                 if (map.containsKey(vin)) {
                     map.get(vin).add(string);
                 } else {

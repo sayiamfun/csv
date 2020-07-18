@@ -13,7 +13,7 @@ public class MainLine {
 
         Map<String, FrequencyStatistics> map = new HashMap<>();
         //读取所有的文件路径`
-        ArrayList<String> strings = ScanPackage.scanFilesWithRecursion("/Users/liwenjie/Downloads/vehData/vehOut/20200616142127/");
+        ArrayList<String> strings = ScanPackage.scanFilesWithRecursion("/Users/liwenjie/Downloads/statis/");
         Collections.sort(strings, new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
@@ -56,9 +56,9 @@ public class MainLine {
         int loading = 0;
         System.out.print("解析中");
 
-        String vin = "LNBMCU3K0HZ050159";
-        String startTime = "20200300" + "090000";
-        String endTime = "20200400" + "160000";
+        String vin = "LB378Y4W8JA183153";
+        String startTime = "20200401" + "090000";
+        String endTime = "20200501" + "160000";
 
         for (String path : map.get(vin).getEntropyList()) {
             loading++;

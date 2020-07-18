@@ -421,7 +421,7 @@ public class ScanPackage {
      * @param s
      * @return
      */
-    private static String getExcelLongTime(String s) {
+    public static String getExcelLongTime(String s) {
         String[] s1 = s.split(" ");
         String[] split = s1[0].split("-");
         StringBuffer stringBuffer = new StringBuffer(100);

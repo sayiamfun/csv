@@ -2,7 +2,6 @@ package com.sayiamfun.MonomerResistanceCompare;
 
 import com.sayiamfun.common.DateUtils;
 import com.sayiamfun.common.utils.ScanPackage;
-import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -32,7 +31,7 @@ import java.util.*;
  *
  * vin，上一帧充电开始时间，下一帧充电开始时间，时间间隔差（天），V差max-10% V差的差值，
  */
-public class PressureDifferenceRateAnalysis {
+public class PressureDifferenceRateAnalysisAllInOne {
 
     public static int oneDay = 24 * 60 * 60 * 1000;
 
@@ -82,9 +81,12 @@ public class PressureDifferenceRateAnalysis {
     private static String avargeSubV;// △V 均值
 
 
+    private static int vinIndex = 4;
+
+
     public static void main(String[] args) throws IOException {
 
-        String inputPath = "/Volumes/UsbDisk/苏朝磊的数据//";
+        String inputPath = "/Volumes/UsbDisk/尹豪3车数据/";
         String inputPath1 = "/Volumes/UsbDisk/data_analysis2/";
         String outPath = "/Users/liwenjie/Downloads/vehData/vehOut/result/";
 
@@ -92,9 +94,9 @@ public class PressureDifferenceRateAnalysis {
         Set<String> strings = ScanPackage.scanDirectory(inputPath);
         Map<String, List<String>> map = new HashMap<>();
         for (String string : strings) {
-            if (string.contains("/base64") && string.contains("/year=2020")) {
+            if (string.contains("/base64")) {
                 String[] split = string.split("/");
-                String vin = split[split.length - 4];
+                String vin = split[vinIndex];
                 if (map.containsKey(vin)) {
                     map.get(vin).add(string);
                 } else {
@@ -126,19 +128,17 @@ public class PressureDifferenceRateAnalysis {
      * @date 2020/7/9 5:30 下午
      */
     private static void outResultDataByInputPath(List<String> strings, String outPath) {
-        Map<Long, List<String>> vehData = new TreeMap<>();
+        Map<Long, List<String>> vData = new TreeMap<>();
         for (String s : strings) {
-            if (s.contains("/vehicle")) {
-                Set<String> strings1 = ScanPackage.scanThisDirectoryFile(s);
-                for (String s1 : strings1) {
-                    Map<Long, List<String>> items1 = ScanPackage.getMapItems1(s1, 2, totalSum);
-                    vehData.putAll(items1);
-                }
+            Set<String> strings1 = ScanPackage.scanThisDirectoryFile(s);
+            for (String s1 : strings1) {
+                Map<Long, List<String>> items1 = ScanPackage.getMapItems2(s1, strings1.size(), totalSum);
+                vData.putAll(items1);
             }
         }
-        if (vehData.size() == 0) return;
+        if (vData.size() == 0) return;
 
-        outResultData(outPath, vehData);
+        outResultData(outPath, vData);
 
     }
 
@@ -160,8 +160,8 @@ public class PressureDifferenceRateAnalysis {
                 firstResultData.setStartSOC(tmpList.get(0).getValue().get(10));
                 firstResultData.setEndSOC(tmpList.get(tmpList.size() - 1).getValue().get(10));
                 firstResultData.setMils(tmpList.get(0).getValue().get(7));
-                firstResultData.setTmax(tmpList.get(0).getValue().get(25));
-                firstResultData.setTmin(tmpList.get(0).getValue().get(28));
+                firstResultData.setTmax(tmpList.get(0).getValue().get(54));
+                firstResultData.setTmin(tmpList.get(0).getValue().get(57));
                 getDifferentSocVsubAndI(tmpList, firstResultData);
                 resultList.add(firstResultData);
                 tmpList = new LinkedList<>();
@@ -378,8 +378,8 @@ public class PressureDifferenceRateAnalysis {
             List<String> value = listEntry.getValue();
             Double SOC = Double.valueOf(value.get(10));
             String I = value.get(9);
-            BigDecimal vMax = new BigDecimal(value.get(19));
-            BigDecimal vMin = new BigDecimal(value.get(22));
+            BigDecimal vMax = new BigDecimal(value.get(48));
+            BigDecimal vMin = new BigDecimal(value.get(51));
             BigDecimal subtract = vMax.subtract(vMin);
             if (SOC == 10) {
                 BigDecimal soc_10_vsubMax = firstResultData.getSOC_10_VsubMax();
@@ -433,121 +433,7 @@ public class PressureDifferenceRateAnalysis {
 
 }
 
-@Data
-class FirstResultData {
 
-    private String vin;
-    private Long startTime;
-    private Long endTime;
-    private String Tmax;
-    private String Tmin;
-    private String mils;
-    private String startSOC;
-    private String endSOC;
-    private BigDecimal SOC_10_VsubMax;
-    private String SOC_10_VsubMaxI;
-    private BigDecimal SOC_10_VsubMin;
-    private String SOC_10_VsubMinI;
-    private BigDecimal SOC_50_VsubMax;
-    private String SOC_50_VsubMaxI;
-    private BigDecimal SOC_50_VsubMin;
-    private String SOC_50_VsubMinI;
-    private BigDecimal SOC_90_VsubMax;
-    private String SOC_90_VsubMaxI;
-    private BigDecimal SOC_90_VsubMin;
-    private String SOC_90_VsubMinI;
-    private BigDecimal SOC_98_VsubMax;
-    private String SOC_98_VsubMaxI;
-    private BigDecimal SOC_98_VsubMin;
-    private String SOC_98_VsubMinI;
-
-
-    public String title() {
-        return "vin,startTime,endTime,Tmax,Tmin,mils,startSOC,endSOC," +
-                "SOC_10_VsubMax,SOC_10_VsubMaxI,SOC_10_VsubMin,SOC_10_VsubMinI," +
-                "SOC_50_VsubMax,SOC_50_VsubMaxI,SOC_50_VsubMin,SOC_50_VsubMinI," +
-                "SOC_90_VsubMax,SOC_90_VsubMaxI,SOC_90_VsubMin,SOC_90_VsubMinI," +
-                "SOC_98_VsubMax,SOC_98_VsubMaxI,SOC_98_VsubMin,SOC_98_VsubMinI," +
-                "";
-    }
-
-    public String body() {
-        return vin + "," +
-                startTime + "," +
-                endTime + "," +
-                Tmax + "," +
-                Tmin + "," +
-                mils + "," +
-                startSOC + "," +
-                endSOC + "," +
-                getBig(SOC_10_VsubMax) + "," +
-                getBig(SOC_10_VsubMaxI) + "," +
-                getBig(SOC_10_VsubMin) + "," +
-                getBig(SOC_10_VsubMinI) + "," +
-                getBig(SOC_50_VsubMax) + "," +
-                getBig(SOC_50_VsubMaxI) + "," +
-                getBig(SOC_50_VsubMin) + "," +
-                getBig(SOC_50_VsubMinI) + "," +
-                getBig(SOC_90_VsubMax) + "," +
-                getBig(SOC_90_VsubMaxI) + "," +
-                getBig(SOC_90_VsubMin) + "," +
-                getBig(SOC_90_VsubMinI) + "," +
-                getBig(SOC_98_VsubMax) + "," +
-                getBig(SOC_98_VsubMaxI) + "," +
-                getBig(SOC_98_VsubMin) + "," +
-                getBig(SOC_98_VsubMinI);
-    }
-
-    private String getBig(Object soc_10_vsubMax) {
-        return null == soc_10_vsubMax ? "" : soc_10_vsubMax.toString();
-    }
-
-
-}
-
-@Data
-class SecondResultData {
-
-    private String vin;
-    private Long lastTime;
-    private Long thisTime;
-    private BigDecimal SOC_10_VsubMaxsub;
-    private BigDecimal SOC_10_VsubMinsub;
-    private BigDecimal SOC_50_VsubMaxsub;
-    private BigDecimal SOC_50_VsubMinsub;
-    private BigDecimal SOC_90_VsubMaxsub;
-    private BigDecimal SOC_90_VsubMinsub;
-    private BigDecimal SOC_98_VsubMaxsub;
-    private BigDecimal SOC_98_VsubMinsub;
-
-    public String title() {
-        return "vin,lastTime,thisTime," +
-                "SOC_10_VsubMaxsub,SOC_10_VsubMinsub," +
-                "SOC_50_VsubMaxsub,SOC_50_VsubMinsub," +
-                "SOC_90_VsubMaxsub,SOC_90_VsubMinsub," +
-                "SOC_98_VsubMaxsub,SOC_98_VsubMinsub," +
-                "";
-    }
-
-    public String body() {
-        return vin + "," +
-                lastTime + "," +
-                thisTime + "," +
-                getBig(SOC_10_VsubMaxsub) + "," +
-                getBig(SOC_10_VsubMinsub) + "," +
-                getBig(SOC_50_VsubMaxsub) + "," +
-                getBig(SOC_50_VsubMinsub) + "," +
-                getBig(SOC_90_VsubMaxsub) + "," +
-                getBig(SOC_90_VsubMinsub) + "," +
-                getBig(SOC_98_VsubMaxsub) + "," +
-                getBig(SOC_98_VsubMinsub);
-    }
-
-    private String getBig(Object soc_10_vsubMax) {
-        return null == soc_10_vsubMax ? "" : soc_10_vsubMax.toString();
-    }
-
-}
 
 
 
