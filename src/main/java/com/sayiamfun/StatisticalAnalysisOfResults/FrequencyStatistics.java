@@ -5,7 +5,6 @@ import com.sayiamfun.common.Constant;
 import com.sayiamfun.common.DateUtils;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
-import org.docx4j.wml.R;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,7 +170,7 @@ public class FrequencyStatistics {
                 String[] s4 = quaList.split("_");
                 int maxMonNum = 0;
                 double maxZ = 0.0;
-                Long dataTime = Long.valueOf(list.get(time));
+                Long dataTime = Long.valueOf(list.get(time)) / 1000000;
                 //获取时间
 //            if (dataTime < needTime) continue;
                 setStartTime(dataTime);
@@ -183,10 +182,20 @@ public class FrequencyStatistics {
                 for (String s3 : s4) {
                     String[] split = s3.split(":");
                     if (split.length == 2) {
-                        Integer smon = Integer.parseInt(split[0]);
+                        Integer smon = null;
+                        try {
+                            smon = Integer.parseInt(split[0]);
+                        } catch (NumberFormatException e) {
+                            continue;
+                        }
                         String sv = split[1];
                         if (!isNumber(sv)) sv = "0";
-                        Double multiply = new BigDecimal(sv).subtract(new BigDecimal("3")).doubleValue();
+                        Double multiply = null;
+                        try {
+                            multiply = new BigDecimal(sv).subtract(new BigDecimal("3")).doubleValue();
+                        } catch (Exception e) {
+                            continue;
+                        }
                         if (multiply <= 0) continue;
                         if (multiply > maxZ) {
                             maxMonNum = smon;
@@ -231,7 +240,7 @@ public class FrequencyStatistics {
                         /**
                          * 充电状态
                          */
-                        Long thisTime = dataTime;
+                        Long thisTime = Long.valueOf(list.get(time));
                         if (lastTime == 0) {
                             lastTime = thisTime;
                             lastStartTime = thisTime;
@@ -385,7 +394,7 @@ public class FrequencyStatistics {
                 if (!getType().equals(next.get(tyep))) continue;
 
                 //获取时间
-                Long dataTime = Long.valueOf(next.get(time));
+                Long dataTime = Long.valueOf(next.get(time)) / 1000000;
 //            if (dataTime < needTime) continue;
                 setStartTime(dataTime);
                 Map<Integer, Integer> tmpMap = getPressureDropConsistencyMapDay().get(dataTime);
@@ -400,8 +409,12 @@ public class FrequencyStatistics {
                 if (StringUtils.isNotEmpty(s1) && new BigDecimal(s1).compareTo(new BigDecimal("2")) > 0) {
                     double v = new BigDecimal(s1).subtract(new BigDecimal("2")).doubleValue();
                     List<String> list = next;
-                    int monNum = getInt(list.get(maxMon));
-
+                    int monNum = 0;
+                    try {
+                        monNum = Integer.parseInt(list.get(maxMon));
+                    } catch (NumberFormatException e) {
+                        continue;
+                    }
                     maxVMap = new HashMap<>();
                     maxVMap.put(monNum, v);
                     getPressureDropConsistencyZMaxMapList().add(maxVMap);
@@ -596,7 +609,7 @@ public class FrequencyStatistics {
 
 
                 //获取时间
-                Long dataTime = Long.valueOf(list.get(time));
+                Long dataTime = Long.valueOf(list.get(time)) / 1000000;
                 setStartTime(dataTime);
 
                 Map<Integer, Integer> tmpMap = getEntropyMapDay().get(dataTime);
@@ -604,7 +617,12 @@ public class FrequencyStatistics {
                 Map<Integer, Double> tmpSumMap = getEntropyMapDayXiShuSum().get(dataTime);
                 if (null == tmpSumMap) tmpSumMap = new TreeMap<>(); //存放一天的(系数减去4)的和
 
-                int monNum = Integer.parseInt(s1);
+                int monNum = 0;
+                try {
+                    monNum = Integer.parseInt(s1);
+                } catch (NumberFormatException e) {
+                    continue;
+                }
                 if (getBatteryNum() == 0) {
                     /** 存放单体数量 */
                     setBatteryNum(list.get(allMonNums).split("_").length + getIgnoreMonNum());
@@ -653,7 +671,7 @@ public class FrequencyStatistics {
                     /**
                      * 充电状态
                      */
-                    Long thisTime = dataTime;
+                    Long thisTime = Long.valueOf(list.get(time));
                     if (lastTime == 0) {
                         lastTime = thisTime;
                         lastStartTime = thisTime;

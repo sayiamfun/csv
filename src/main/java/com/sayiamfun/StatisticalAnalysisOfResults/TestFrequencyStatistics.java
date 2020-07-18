@@ -12,7 +12,7 @@ import java.util.*;
 public class TestFrequencyStatistics {
 
 
-    static String inpath = "/Users/liwenjie/Downloads/vehData/vehOut/20200716152724/";
+    static String inpath = "/Users/liwenjie/Downloads/vehData/vehOut/20200718121101/";
 
     static Long needTime = 20200428L;
 
