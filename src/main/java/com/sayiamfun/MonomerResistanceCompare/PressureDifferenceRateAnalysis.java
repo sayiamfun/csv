@@ -433,6 +433,19 @@ public class PressureDifferenceRateAnalysis {
 
 }
 
+class TheInputData{
+
+    private String vin;
+    private Long time;
+    private String SOC;
+    private String mils;
+    private String Tmax;
+    private String Tmin;
+    private String Vmax;
+    private String Vmin;
+
+}
+
 @Data
 class FirstResultData {
 

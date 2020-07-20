@@ -1961,14 +1961,14 @@ public class FrequencyStatistics {
                 CreatWord.creatWotdOne(CreatWord.getData(longMapEntry.getValue()), Constant.createWordOne, outPath, getVIN() + "_" + getType() + "VENum.docx");
             }
         } else if (getVolatilityDetectionMapNums().size() > 1) {
-            CreatWord.createWotdTwoNums(getEntropyMapNums(), getBatteryNum(), Constant.createWordTwo, outPath, getVIN() + "_" + getType() + "VENum.docx");
+            CreatWord.createWotdTwoNums(getVolatilityDetectionMapNums(), getBatteryNum(), Constant.createWordTwo, outPath, getVIN() + "_" + getType() + "VENum.docx");
         }
         if (getPressureDropConsistencyMapNums().size() == 1) {
             for (Map.Entry<Long, Map<Integer, Integer>> longMapEntry : getPressureDropConsistencyMapNums().entrySet()) {
                 CreatWord.creatWotdOne(CreatWord.getData(longMapEntry.getValue()), Constant.createWordOne, outPath, getVIN() + "_" + getType() + "PENum.docx");
             }
         } else if (getPressureDropConsistencyMapNums().size() > 1) {
-            CreatWord.createWotdTwoNums(getEntropyMapNums(), getBatteryNum(), Constant.createWordTwo, outPath, getVIN() + "_" + getType() + "PENum.docx");
+            CreatWord.createWotdTwoNums(getPressureDropConsistencyMapNums(), getBatteryNum(), Constant.createWordTwo, outPath, getVIN() + "_" + getType() + "PENum.docx");
         }
         Merge2.merge(outPath, getVIN(), getType(), this);
     }
