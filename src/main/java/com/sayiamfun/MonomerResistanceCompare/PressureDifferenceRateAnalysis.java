@@ -84,7 +84,7 @@ public class PressureDifferenceRateAnalysis {
 
     public static void main(String[] args) throws IOException {
 
-        String inputPath = "/Volumes/UsbDisk/苏朝磊的数据//";
+        String inputPath = "/Users/liwenjie/Downloads/vehData/苏朝磊3车数据/电压变化率和内阻单体排序/";
         String inputPath1 = "/Volumes/UsbDisk/data_analysis2/";
         String outPath = "/Users/liwenjie/Downloads/vehData/vehOut/result/";
 

@@ -24,7 +24,7 @@ public class MonomerResistanceCompare {
     /**
      * 一段帧数
      */
-    public static int oneSum = 4000;
+    public static int oneSum = 2000;
     /**
      * 读取文件总条数 最后多少条
      */
@@ -65,7 +65,7 @@ public class MonomerResistanceCompare {
 
     public static void main(String[] args) throws IOException {
 
-        String inputPath = "/Volumes/UsbDisk/veh_49_originData/Volumes/UsbDisk/";
+        String inputPath = "/Users/liwenjie/Downloads/vehData/苏朝磊3车数据/电压变化率和内阻单体排序/";
         String inputPath1 = "/Volumes/UsbDisk/data_analysis2/";
         String outPath = "/Users/liwenjie/Downloads/vehData/vehOut/result/";
 
@@ -168,7 +168,7 @@ public class MonomerResistanceCompare {
         BufferedWriter bw = null;
         try {
             outPath = mkdirDir(outPath);
-            ow = new OutputStreamWriter(new FileOutputStream(new File(outPath + resultData.getVin() + "-" + resultData.getStartTime() + "-" + resultData.getEndTime() + ".csv"), true), ScanPackage.encode);
+            ow = new OutputStreamWriter(new FileOutputStream(new File(outPath + resultData.getVin() + ".csv"), true), ScanPackage.encode);
             bw = new BufferedWriter(ow);
             if (first) {
                 bw.write("vin,开始时间,结束时间," +
