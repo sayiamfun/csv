@@ -311,53 +311,57 @@ public class PressureDifferenceRateAnalysis {
      * @date 2020/7/16 6:35 下午
      */
     private static BigDecimal subVsub(FirstResultData lastFirstStepData, FirstResultData firstResultData, int soc, int max) {
+        Date lastDate = DateUtils.dateTime(DateUtils.YYYYMMDDHHMMSS, lastFirstStepData.getStartTime().toString());
+        Date thisDate = DateUtils.dateTime(DateUtils.YYYYMMDDHHMMSS, firstResultData.getStartTime().toString());
+        long l = (thisDate.getTime() - lastDate.getTime()) / (oneDay);
+        BigDecimal dateSub = new BigDecimal("" + (l - 1));
         if (soc == 10) {
             if (max == 1) {
                 BigDecimal vsubMax = lastFirstStepData.getSOC_10_VsubMax();
                 BigDecimal vsubMax1 = firstResultData.getSOC_10_VsubMax();
                 if (vsubMax == null || vsubMax1 == null) return null;
-                return vsubMax.subtract(vsubMax1);
+                return vsubMax.subtract(vsubMax1).divide(dateSub, 10, BigDecimal.ROUND_HALF_UP);
             } else {
                 BigDecimal vsubMin = lastFirstStepData.getSOC_10_VsubMin();
                 BigDecimal vsubMin1 = firstResultData.getSOC_10_VsubMin();
                 if (vsubMin == null || vsubMin1 == null) return null;
-                return vsubMin.subtract(vsubMin1);
+                return vsubMin.subtract(vsubMin1).divide(dateSub, 10, BigDecimal.ROUND_HALF_UP);
             }
         } else if (soc == 50) {
             if (max == 1) {
                 BigDecimal vsubMax = lastFirstStepData.getSOC_50_VsubMax();
                 BigDecimal vsubMax1 = firstResultData.getSOC_50_VsubMax();
                 if (vsubMax == null || vsubMax1 == null) return null;
-                return vsubMax.subtract(vsubMax1);
+                return vsubMax.subtract(vsubMax1).divide(dateSub, 10, BigDecimal.ROUND_HALF_UP);
             } else {
                 BigDecimal vsubMin = lastFirstStepData.getSOC_50_VsubMin();
                 BigDecimal vsubMin1 = firstResultData.getSOC_50_VsubMin();
                 if (vsubMin == null || vsubMin1 == null) return null;
-                return vsubMin.subtract(vsubMin1);
+                return vsubMin.subtract(vsubMin1).divide(dateSub, 10, BigDecimal.ROUND_HALF_UP);
             }
         } else if (soc == 90) {
             if (max == 1) {
                 BigDecimal vsubMax = lastFirstStepData.getSOC_90_VsubMax();
                 BigDecimal vsubMax1 = firstResultData.getSOC_90_VsubMax();
                 if (vsubMax == null || vsubMax1 == null) return null;
-                return vsubMax.subtract(vsubMax1);
+                return vsubMax.subtract(vsubMax1).divide(dateSub, 10, BigDecimal.ROUND_HALF_UP);
             } else {
                 BigDecimal vsubMin = lastFirstStepData.getSOC_90_VsubMin();
                 BigDecimal vsubMin1 = firstResultData.getSOC_90_VsubMin();
                 if (vsubMin == null || vsubMin1 == null) return null;
-                return vsubMin.subtract(vsubMin1);
+                return vsubMin.subtract(vsubMin1).divide(dateSub, 10, BigDecimal.ROUND_HALF_UP);
             }
         } else if (soc == 98) {
             if (max == 1) {
                 BigDecimal vsubMax = lastFirstStepData.getSOC_98_VsubMax();
                 BigDecimal vsubMax1 = firstResultData.getSOC_98_VsubMax();
                 if (vsubMax == null || vsubMax1 == null) return null;
-                return vsubMax.subtract(vsubMax1);
+                return vsubMax.subtract(vsubMax1).divide(dateSub, 10, BigDecimal.ROUND_HALF_UP);
             } else {
                 BigDecimal vsubMin = lastFirstStepData.getSOC_98_VsubMin();
                 BigDecimal vsubMin1 = firstResultData.getSOC_98_VsubMin();
                 if (vsubMin == null || vsubMin1 == null) return null;
-                return vsubMin.subtract(vsubMin1);
+                return vsubMin.subtract(vsubMin1).divide(dateSub, 10, BigDecimal.ROUND_HALF_UP);
             }
         }
         return null;
@@ -433,7 +437,7 @@ public class PressureDifferenceRateAnalysis {
 
 }
 
-class TheInputData{
+class TheInputData {
 
     private String vin;
     private Long time;
