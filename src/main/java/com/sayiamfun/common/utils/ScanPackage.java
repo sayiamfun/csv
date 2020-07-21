@@ -474,4 +474,8 @@ public class ScanPackage {
         }
         return resultMap;
     }
+
+    public static String getFileName(String string) {
+        return string.substring(string.lastIndexOf("/"));
+    }
 }

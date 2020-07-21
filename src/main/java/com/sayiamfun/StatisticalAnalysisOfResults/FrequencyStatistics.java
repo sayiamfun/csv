@@ -36,7 +36,8 @@ public class FrequencyStatistics {
     private int zMaxNums = 5000;//Zmax每多少帧统计一次 所有模型
     private int BatteryNum = 0;
     private int IgnoreMonNum = 0;
-    private Long needTime = 20190401L;
+    private Long needStartTime = 0L;
+    private Long needEndTime = 0L;
     private String VIN;
     private String nowTime;
     private List<String> volatilityDetectionList = new LinkedList<>();//波动性
@@ -120,6 +121,8 @@ public class FrequencyStatistics {
         this.volatilityDetectionList = frequencyStatistics.getVolatilityDetectionList();
         this.pressureDropConsistencyList = frequencyStatistics.getPressureDropConsistencyList();
         this.entropyList = frequencyStatistics.getEntropyList();
+        this.needStartTime = frequencyStatistics.getNeedStartTime();
+        this.needEndTime = frequencyStatistics.getNeedEndTime();
     }
 
     public void setStartTime(Long dataTime) {
@@ -170,9 +173,10 @@ public class FrequencyStatistics {
                 String[] s4 = quaList.split("_");
                 int maxMonNum = 0;
                 double maxZ = 0.0;
-                Long dataTime = Long.valueOf(list.get(time)) / 1000000;
+                Long dataTime = Long.valueOf(list.get(time));
+                if (dataTime < getNeedStartTime() || dataTime > getNeedEndTime()) continue;
                 //获取时间
-//            if (dataTime < needTime) continue;
+                dataTime = dataTime / 1000000;
                 setStartTime(dataTime);
                 Map<Integer, Integer> tmpMap = getVolatilityDetectionMapDay().get(dataTime);
                 if (null == tmpMap) tmpMap = new TreeMap<>(); //存放一天的数据
@@ -394,7 +398,9 @@ public class FrequencyStatistics {
                 if (!getType().equals(next.get(tyep))) continue;
 
                 //获取时间
-                Long dataTime = Long.valueOf(next.get(time)) / 1000000;
+                Long dataTime = Long.valueOf(next.get(time));
+                if (dataTime < getNeedStartTime() || dataTime > getNeedEndTime()) continue;
+                dataTime = dataTime / 1000000;
 //            if (dataTime < needTime) continue;
                 setStartTime(dataTime);
                 Map<Integer, Integer> tmpMap = getPressureDropConsistencyMapDay().get(dataTime);
@@ -609,7 +615,10 @@ public class FrequencyStatistics {
 
 
                 //获取时间
-                Long dataTime = Long.valueOf(list.get(time)) / 1000000;
+                Long dataTime = Long.valueOf(list.get(time));
+                if (dataTime < getNeedStartTime() || dataTime > getNeedEndTime()) continue;
+                dataTime = dataTime / 1000000;
+
                 setStartTime(dataTime);
 
                 Map<Integer, Integer> tmpMap = getEntropyMapDay().get(dataTime);

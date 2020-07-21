@@ -12,12 +12,19 @@ import java.util.*;
 public class TestFrequencyStatistics {
 
 
-    static String inpath = "/Users/liwenjie/Downloads/vehData/vehOut/20200718121101/";
+    static String inpath = "/Users/liwenjie/Downloads/vehData/苏朝磊3车数据/结果文件/全生命周期/data/suzhaolei3cheshuju/1000000/5-LB378Y4WXJA179539/category=run/part-00191-4919f1c7-6f05-47df-b214-572a086c3498.c000/20200710235727/";
 
-    static Long needTime = 20200428L;
+
+
+    static Long startTime = 20191212000001L;
+    static Long endTime = 20191212045701L;
 
     public static void main(String[] args) {
 
+        String time = "20191007175627-20191007205446";
+        String[] split = time.split("-");
+        startTime = Long.valueOf(split[0]);
+        endTime = Long.valueOf(split[1]);
         //读取所有的文件路径
         Set<String> strings1 = ScanPackage.scanDirectory(inpath);
         for (String s : strings1) {
@@ -59,7 +66,8 @@ public class TestFrequencyStatistics {
             } else {
                 FrequencyStatistics frequencyStatistics = new FrequencyStatistics();
                 frequencyStatistics.setVIN(vin);
-                frequencyStatistics.setNeedTime(needTime);
+                frequencyStatistics.setNeedStartTime(startTime);
+                frequencyStatistics.setNeedEndTime(endTime);
                 if (string.contains("压降一致性故障诊断模型")) {
                     frequencyStatistics.getPressureDropConsistencyList().add(string);
                 } else if (string.contains("波动一致性故障诊断模型")) {
