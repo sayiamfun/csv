@@ -115,5 +115,6 @@
     <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.2" level="project" />
     <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2.2" level="project" />
     <orderEntry type="library" name="Maven: com.cloudera:ImpalaJDBC41:2.6.3" level="project" />
+    <orderEntry type="library" name="commons-compress-1.4.1" level="project" />
   </component>
 </module>
