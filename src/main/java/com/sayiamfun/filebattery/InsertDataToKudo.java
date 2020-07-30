@@ -15,11 +15,12 @@ import java.util.*;
 public class InsertDataToKudo {
 
     public static void main(String[] args) {
+        String inputFile = "C:\\Users\\liwenjie\\Downloads\\北理工课题专项-20年1-2月(1).xls";
         InputStream is = null;// 输入流对象
         HSSFWorkbook workbook = null;
         try {
             String cellStr = null;// 单元格，最终按字符串处理
-            is = new FileInputStream(new File("C:\\Users\\liwenjie\\Downloads\\北理工课题专项-20年1-2月(1).xls"));// 获取文件输入流
+            is = new FileInputStream(new File(inputFile));// 获取文件输入流
             workbook = new HSSFWorkbook(is);// 创建Excel文件对象
             HSSFSheet sheet = workbook.getSheetAt(0);// 取出第一个工作表，索引是0
             // 开始循环遍历行，表头不处理，从1开始
@@ -37,9 +38,9 @@ public class InsertDataToKudo {
                         cellStr = "";
                     } else {
                         try {
-                            cellStr = cell.getStringCellValue().replaceAll("\r",""); //如果是字符串，按照字符串处理
+                            cellStr = cell.getStringCellValue().replaceAll("\r", ""); //如果是字符串，按照字符串处理
                         } catch (Exception e) {
-                            cellStr = "" + cell.getNumericCellValue(); //报异常安装数字处理  暂时没有找到判断方法
+                            cellStr = "" + cell.getNumericCellValue(); //报异常按照数字处理  暂时没有找到判断方法
                         }
                     }
                     childrenList.add(cellStr);
@@ -118,7 +119,7 @@ public class InsertDataToKudo {
                     "id"
             };
             String table = "impala::default.sys_vehicle_constant";
-            KuduOperUtil.insert(table,dataList,clu);
+            KuduOperUtil.insert(table, dataList, clu);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {// 关闭文件流
