@@ -7,13 +7,14 @@ import java.io.*;
 public class OriginToIyMB {
 
     public static void main(String[] args) {
-        String inputFile = "/Users/liwenjie/Downloads/tboxvehiclegateway01a.rtm.live.log-limit";
+
+        String inputFile = "/Volumes/Untitled/new data/tboxvehiclegateway01a.rtm.live-20200730.log/tboxvehiclegateway01a.rtm.live-20200730.log";
 
         InputStreamReader ir = null;
         BufferedReader reader = null;
 
         //CSV文件输出可追加
-        String outFile = "/Users/liwenjie/Downloads/tboxvehiclegateway01a.rtm.live.log-limit_result";
+        String outFile = "/Users/liwenjie/Downloads/vehData/vehOut/01a.csv";
 
         OutputStreamWriter ow = null;
         BufferedWriter bw = null;

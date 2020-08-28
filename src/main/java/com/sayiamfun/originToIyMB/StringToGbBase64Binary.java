@@ -18,7 +18,7 @@ public class StringToGbBase64Binary {
 			return null;
 		}
 		
-		source = source.trim();
+		source = source.trim().toUpperCase();
 		if (source.length() % 2 == 0) {
 			byte [] bytes = hexStr2Str(source);
 			return Base64.getEncoder().encodeToString(bytes);

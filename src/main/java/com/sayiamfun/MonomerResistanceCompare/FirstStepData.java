@@ -26,7 +26,19 @@ public class FirstStepData {
     private Double subV;    //压差
     private List<String> monAndVList = new LinkedList<>();//电压列表
 
-    public FirstStepData(String vin, Long time, double soc, String carStatus, String chargeStatus, double totalE, double maxV, int maxMon, double minV, int minMon, double v, List<String> monAndVList) {
+    public FirstStepData(String vin, Long time, Double SOC, String carStatus, String chargeStatus, Double totalE, Double maxV, Integer maxVNum, Double minV, Integer minVNum, Double subV, List<String> monAndVList) {
+        this.vin = vin;
+        this.time = time;
+        this.SOC = SOC;
+        this.carStatus = carStatus;
+        this.chargeStatus = chargeStatus;
+        this.totalE = totalE;
+        this.maxV = maxV;
+        this.maxVNum = maxVNum;
+        this.minV = minV;
+        this.minVNum = minVNum;
+        this.subV = subV;
+        this.monAndVList = monAndVList;
     }
 
     public boolean checkFirstData() {

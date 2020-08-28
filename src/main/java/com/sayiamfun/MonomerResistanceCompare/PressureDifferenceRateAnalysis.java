@@ -84,7 +84,7 @@ public class PressureDifferenceRateAnalysis {
 
     public static void main(String[] args) throws IOException {
 
-        String inputPath = "/Users/liwenjie/Downloads/vehData/苏朝磊3车数据/电压变化率和内阻单体排序/";
+        String inputPath = "/Volumes/UsbDisk/QL/QL/";
         String inputPath1 = "/Volumes/UsbDisk/data_analysis2/";
         String outPath = "/Users/liwenjie/Downloads/vehData/vehOut/result/";
 
@@ -92,7 +92,7 @@ public class PressureDifferenceRateAnalysis {
         Set<String> strings = ScanPackage.scanDirectory(inputPath);
         Map<String, List<String>> map = new HashMap<>();
         for (String string : strings) {
-            if (string.contains("/base64") && string.contains("/year=2020")) {
+            if (string.contains("/base64") && string.contains("/year=2019")) {
                 String[] split = string.split("/");
                 String vin = split[split.length - 4];
                 if (map.containsKey(vin)) {

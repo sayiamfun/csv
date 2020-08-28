@@ -1,11 +1,13 @@
 package com.sayiamfun.StatisticalAnalysisOfResults.casion;
 
-import com.aspose.words.*;
+import com.aspose.words.Chart;
+import com.aspose.words.Document;
+import com.aspose.words.NodeType;
+import com.aspose.words.Shape;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.List;
 
 public class CreatWord {
 
