@@ -1,6 +1,7 @@
 package com.sayiamfun.file20200414;
 
 import com.sayiamfun.common.utils.ScanPackage;
+import com.sayiamfun.otherfiletomodelinputfile.FileToModelFile;
 
 import java.io.*;
 import java.util.HashSet;
@@ -67,18 +68,7 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (null != reader) reader.close();
-                if (null != ir) ir.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                if (null != bw) bw.close();
-                if (null != ow) ow.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            FileToModelFile.closeFileStream(ir, reader, ow, bw);
             try {
                 if (null != bw2) bw2.close();
                 if (null != ow2) ow2.close();
