@@ -6,7 +6,9 @@ import com.aspose.words.NodeType;
 import com.aspose.words.Shape;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 
+import java.io.InputStream;
 import java.util.*;
 
 public class CreatWord {
@@ -63,12 +65,15 @@ public class CreatWord {
         Tool.ModifyColor("/Users/liwenjie/Downloads/vehData/vehOut/result/output/", "result3.docx", 2, color);
     }
 
-    public static void creatWotdOne(Map<Integer, Double> dataList, String template, String outPath, String fileName) {
+    public static void creatWotdOne(Map<Integer, Double> dataList, String outPath, String fileName) {
         // TODO Auto-generated method stub
 
         Document doc = null;
         try {
-            doc = new Document(template);
+            ClassPathResource classPathResource = new ClassPathResource("exceltmp/template.docx");
+            InputStream inputStream = classPathResource.getInputStream();
+
+            doc = new Document(inputStream);
             //获取第一章节
             doc.getSections().get(0);
             //获取第一个shapeͼ图形
@@ -100,7 +105,7 @@ public class CreatWord {
         return resultMap;
     }
 
-    public static void createWotdTwoNums(Map<Long, Map<Integer, Integer>> dataList, int monNums, String template, String outPath, String fileName) {
+    public static void createWotdTwoNums(Map<Long, Map<Integer, Integer>> dataList, int monNums, String outPath, String fileName) {
         ArrayList<Long> longs = new ArrayList<>(dataList.keySet());
         Collections.sort(longs, (o1, o2) -> o1.compareTo(o2));
         String[] strings = new String[longs.size()];
@@ -109,7 +114,9 @@ public class CreatWord {
         }
         Document doc = null;
         try {
-            doc = new Document(template);
+            ClassPathResource classPathResource = new ClassPathResource("exceltmp/line-chart-template.docx");
+            InputStream inputStream = classPathResource.getInputStream();
+            doc = new Document(inputStream);
             //获取第一章节
             doc.getSections().get(0);
             //获取第一个shapeͼ图形
@@ -137,7 +144,7 @@ public class CreatWord {
         }
     }
 
-    public static void createWotdTwoWeek(Map<Long, Map<Integer, Double>> dataList, int monNums, String template, String outPath, String fileName) {
+    public static void createWotdTwoWeek(Map<Long, Map<Integer, Double>> dataList, int monNums, String outPath, String fileName) {
         ArrayList<Long> longs = new ArrayList<>(dataList.keySet());
         Collections.sort(longs, (o1, o2) -> o1.compareTo(o2));
         String[] strings = new String[longs.size()];
@@ -146,7 +153,9 @@ public class CreatWord {
         }
         Document doc = null;
         try {
-            doc = new Document(template);
+            ClassPathResource classPathResource = new ClassPathResource("exceltmp/line-chart-template.docx");
+            InputStream inputStream = classPathResource.getInputStream();
+            doc = new Document(inputStream);
             //获取第一章节
             doc.getSections().get(0);
             //获取第一个shapeͼ图形
@@ -179,7 +188,7 @@ public class CreatWord {
     }
 
     private static Double getDoubleValue(Double integer) {
-        return null == integer ? 0.0 : integer.doubleValue();
+        return null == integer ? 0.0 : integer;
     }
 
 
